@@ -2,123 +2,696 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes" />
-    <title>Onyx Bank</title>
-    <link rel="stylesheet" href="style.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
+    <title>VibeChat</title>
+    <!-- Firebase Compat SDK (через CDN) -->
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #0a0a0f;
+            color: #e0e0e0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 16px;
+        }
+        .app {
+            background: #13131a;
+            border-radius: 32px;
+            max-width: 480px;
+            width: 100%;
+            padding: 24px 20px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+            border: 1px solid rgba(255,255,255,0.03);
+            min-height: 600px;
+            display: flex;
+            flex-direction: column;
+        }
+        h1 {
+            font-size: 26px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #a0ffa0, #40c040);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 16px;
+        }
+        .form-group {
+            margin-bottom: 14px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: #8888a0;
+            margin-bottom: 4px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 12px 14px;
+            background: #1c1c26;
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 14px;
+            color: #e0e0e0;
+            font-size: 16px;
+            outline: none;
+            transition: border 0.2s;
+        }
+        .form-group input:focus {
+            border-color: rgba(100,255,100,0.3);
+        }
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: #2a3a2a;
+            border: none;
+            border-radius: 60px;
+            color: #80ff80;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-top: 4px;
+        }
+        .btn:hover { background: #3a4a3a; }
+        .btn:active { transform: scale(0.96); }
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.08);
+            color: #8888a0;
+            margin-top: 8px;
+        }
+        .btn-secondary:hover { background: rgba(255,255,255,0.04); }
+        .toggle-link {
+            text-align: center;
+            margin-top: 12px;
+            color: #8888a0;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .toggle-link span { color: #80ff80; }
+        .hidden { display: none; }
+
+        /* Чат */
+        .chat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            margin-bottom: 12px;
+            flex-shrink: 0;
+        }
+        .chat-header .back {
+            color: #80ff80;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .chat-header .partner {
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .verified-badge {
+            background: #40c040;
+            color: #000;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 40px;
+            letter-spacing: 0.3px;
+        }
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding-right: 4px;
+            margin-bottom: 12px;
+            max-height: 400px;
+        }
+        .messages::-webkit-scrollbar { width: 3px; }
+        .messages::-webkit-scrollbar-thumb { background: #2c2c3a; border-radius: 10px; }
+        .msg {
+            max-width: 80%;
+            padding: 10px 14px;
+            border-radius: 18px;
+            background: #1c1c26;
+            font-size: 15px;
+            line-height: 1.4;
+            align-self: flex-start;
+            border: 1px solid rgba(255,255,255,0.03);
+        }
+        .msg.self {
+            align-self: flex-end;
+            background: #2a3a2a;
+            border-color: rgba(100,255,100,0.08);
+        }
+        .msg .time {
+            font-size: 10px;
+            opacity: 0.4;
+            display: block;
+            text-align: right;
+            margin-top: 4px;
+        }
+        .input-row {
+            display: flex;
+            gap: 10px;
+            background: #1a1a22;
+            padding: 4px 4px 4px 16px;
+            border-radius: 60px;
+            border: 1px solid rgba(255,255,255,0.05);
+            flex-shrink: 0;
+        }
+        .input-row input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #e0e0e0;
+            font-size: 15px;
+            padding: 10px 0;
+        }
+        .input-row button {
+            background: #2a3a2a;
+            border: none;
+            color: #80ff80;
+            width: 48px;
+            border-radius: 40px;
+            font-size: 20px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .input-row button:hover { background: #3a4a3a; }
+        .input-row button:active { transform: scale(0.92); }
+
+        /* Список пользователей */
+        .user-list {
+            flex: 1;
+            overflow-y: auto;
+            margin-top: 8px;
+        }
+        .user-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 14px;
+            background: rgba(255,255,255,0.02);
+            border-radius: 16px;
+            margin-bottom: 4px;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+        .user-item:hover { background: rgba(255,255,255,0.05); }
+        .user-item .name {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 500;
+        }
+        .user-item .verified-badge { font-size: 9px; padding: 1px 8px; }
+        .admin-actions {
+            display: flex;
+            gap: 8px;
+        }
+        .admin-actions button {
+            background: rgba(255,255,255,0.05);
+            border: none;
+            color: #8888a0;
+            padding: 4px 10px;
+            border-radius: 30px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .admin-actions button:hover { background: rgba(255,255,255,0.1); color: #80ff80; }
+
+        .search-box {
+            margin-bottom: 12px;
+        }
+        .search-box input {
+            width: 100%;
+            padding: 10px 14px;
+            background: #1c1c26;
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 14px;
+            color: #e0e0e0;
+            font-size: 14px;
+            outline: none;
+        }
+        .search-box input:focus { border-color: rgba(100,255,100,0.2); }
+
+        .empty {
+            text-align: center;
+            color: #3a3a44;
+            font-size: 14px;
+            padding: 40px 0;
+        }
+    </style>
 </head>
 <body>
-    <div class="app">
+<div class="app" id="app">
+    <!-- СТРАНИЦА ВХОДА/РЕГИСТРАЦИИ -->
+    <div id="authPage">
+        <h1>VibeChat</h1>
+        <div id="authForm">
+            <div class="form-group">
+                <label>Имя пользователя</label>
+                <input type="text" id="usernameInput" placeholder="никнейм" />
+            </div>
+            <div class="form-group">
+                <label>Пароль</label>
+                <input type="password" id="passwordInput" placeholder="••••••••" />
+            </div>
+            <button class="btn" id="loginBtn">Войти</button>
+            <button class="btn btn-secondary" id="registerBtn">Зарегистрироваться</button>
+            <div class="toggle-link" id="toggleAuthLink">
+                <span>Нет аккаунта? Создать</span>
+            </div>
+        </div>
+        <div id="authError" style="color:#ff6b6b; font-size:14px; margin-top:10px; text-align:center;"></div>
+    </div>
 
-        <div class="spacer"></div>
+    <!-- ЧАТ (появляется после входа) -->
+    <div id="chatPage" class="hidden">
+        <div class="chat-header">
+            <span class="back" id="backToUsers">←</span>
+            <span class="partner" id="chatPartnerName"></span>
+            <span style="width:40px;"></span>
+        </div>
+        <div class="messages" id="messagesContainer"></div>
+        <div class="input-row">
+            <input type="text" id="messageInput" placeholder="сообщение..." />
+            <button id="sendMsgBtn">➤</button>
+        </div>
+    </div>
 
-        <!-- КАРТА -->
-        <div class="card">
-            <div class="card-content">
-                <div class="card-top">
-                    <span class="bank-name">Onyx Bank</span>
+    <!-- СПИСОК ПОЛЬЗОВАТЕЛЕЙ (появляется после входа) -->
+    <div id="usersPage">
+        <h1>VibeChat</h1>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <span style="font-size:14px; color:#8888a0;">Контакты</span>
+            <button id="logoutBtn" style="background:none; border:none; color:#8888a0; font-size:13px; cursor:pointer;">Выйти</button>
+        </div>
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Найти пользователя..." />
+        </div>
+        <div class="user-list" id="userListContainer">
+            <div class="empty">Загрузка...</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ============================================================
+    // 1. ВСТАВЬ СВОЙ КОНФИГ FIREBASE
+    // ============================================================
+    const firebaseConfig = {
+        apiKey: "AIzaSyD-axq_SkB8d0ynHZ-lCyxGL3Kk99SVZV8",
+        authDomain: "gsend-d79c7.firebaseapp.com",
+        projectId: "gsend-d79c7",
+        storageBucket: "gsend-d79c7.firebasestorage.app",
+        messagingSenderId: "278298834635",
+        appId: "1:278298834635:web:f0e2789cf83fc329388d4e"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.database();
+
+    // ============================================================
+    // 2. ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+    // ============================================================
+    function getUsernameFromEmail(email) {
+        if (!email) return '';
+        return email.split('@')[0];
+    }
+
+    function getEmailFromUsername(username) {
+        return username.toLowerCase().trim() + '@vibechat.local';
+    }
+
+    function formatTime(timestamp) {
+        const d = new Date(timestamp);
+        return d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0');
+    }
+
+    function showAuthError(msg) {
+        document.getElementById('authError').textContent = msg;
+    }
+
+    // ============================================================
+    // 3. УПРАВЛЕНИЕ СТРАНИЦАМИ
+    // ============================================================
+    const authPage = document.getElementById('authPage');
+    const chatPage = document.getElementById('chatPage');
+    const usersPage = document.getElementById('usersPage');
+
+    function showPage(page) {
+        authPage.classList.add('hidden');
+        chatPage.classList.add('hidden');
+        usersPage.classList.add('hidden');
+        document.getElementById(page).classList.remove('hidden');
+    }
+
+    // ============================================================
+    // 4. АВТОРИЗАЦИЯ
+    // ============================================================
+    let currentUser = null;
+    let currentUsername = '';
+    let isAdmin = false;
+
+    // Переключение между входом и регистрацией
+    let isLoginMode = true;
+    document.getElementById('toggleAuthLink').addEventListener('click', function() {
+        isLoginMode = !isLoginMode;
+        const link = this.querySelector('span');
+        if (isLoginMode) {
+            link.textContent = 'Нет аккаунта? Создать';
+            document.getElementById('loginBtn').textContent = 'Войти';
+            document.getElementById('registerBtn').textContent = 'Зарегистрироваться';
+        } else {
+            link.textContent = 'Уже есть аккаунт? Войти';
+            document.getElementById('loginBtn').textContent = 'Войти';
+            document.getElementById('registerBtn').textContent = 'Зарегистрироваться';
+        }
+        showAuthError('');
+    });
+
+    // Регистрация
+    document.getElementById('registerBtn').addEventListener('click', async function() {
+        const username = document.getElementById('usernameInput').value.trim();
+        const password = document.getElementById('passwordInput').value;
+        if (!username || password.length < 6) {
+            showAuthError('Имя и пароль (мин. 6 символов) обязательны');
+            return;
+        }
+        const email = getEmailFromUsername(username);
+        try {
+            const cred = await auth.createUserWithEmailAndPassword(email, password);
+            const uid = cred.user.uid;
+            // Сохраняем данные пользователя
+            await db.ref('users/' + uid).set({
+                username: username,
+                verified: false,
+                admin: false // по умолчанию
+            });
+            // Если это первый пользователь или admin, можно назначить админа
+            // (для демо: первый зарегистрированный становится админом)
+            const snapshot = await db.ref('users').once('value');
+            const count = snapshot.numChildren();
+            if (count === 1) {
+                await db.ref('users/' + uid + '/admin').set(true);
+                await db.ref('admins/' + uid).set(true);
+            }
+            showAuthError('');
+            document.getElementById('usernameInput').value = '';
+            document.getElementById('passwordInput').value = '';
+        } catch (err) {
+            showAuthError('Ошибка: ' + err.message);
+        }
+    });
+
+    // Вход
+    document.getElementById('loginBtn').addEventListener('click', async function() {
+        const username = document.getElementById('usernameInput').value.trim();
+        const password = document.getElementById('passwordInput').value;
+        if (!username || !password) {
+            showAuthError('Введите имя и пароль');
+            return;
+        }
+        const email = getEmailFromUsername(username);
+        try {
+            await auth.signInWithEmailAndPassword(email, password);
+            showAuthError('');
+            document.getElementById('usernameInput').value = '';
+            document.getElementById('passwordInput').value = '';
+        } catch (err) {
+            showAuthError('Неверное имя или пароль');
+        }
+    });
+
+    // Выход
+    document.getElementById('logoutBtn').addEventListener('click', function() {
+        auth.signOut();
+    });
+
+    // ============================================================
+    // 5. ОБРАБОТЧИК СОСТОЯНИЯ АВТОРИЗАЦИИ
+    // ============================================================
+    auth.onAuthStateChanged(async function(user) {
+        if (user) {
+            currentUser = user;
+            // Получаем данные пользователя
+            const snap = await db.ref('users/' + user.uid).once('value');
+            const data = snap.val();
+            if (!data) {
+                // Если по какой-то причине нет записи — выходим
+                auth.signOut();
+                return;
+            }
+            currentUsername = data.username || getUsernameFromEmail(user.email);
+            isAdmin = data.admin === true;
+
+            // Показываем список пользователей
+            showPage('usersPage');
+            loadUsers();
+            // Слушаем изменения пользователей
+            listenUsers();
+            // Загружаем сообщения если чат открыт
+        } else {
+            currentUser = null;
+            currentUsername = '';
+            isAdmin = false;
+            showPage('authPage');
+            // Отписываемся от слушателей
+            if (window.usersListener) window.usersListener();
+            if (window.messagesListener) window.messagesListener();
+            document.getElementById('userListContainer').innerHTML = '<div class="empty">Загрузка...</div>';
+            document.getElementById('messagesContainer').innerHTML = '';
+        }
+    });
+
+    // ============================================================
+    // 6. РАБОТА СО СПИСКОМ ПОЛЬЗОВАТЕЛЕЙ
+    // ============================================================
+    let allUsers = [];
+
+    function loadUsers() {
+        // Просто инициируем загрузку через слушатель
+    }
+
+    function listenUsers() {
+        if (window.usersListener) window.usersListener();
+        const ref = db.ref('users');
+        const listener = ref.on('value', function(snapshot) {
+            const data = snapshot.val();
+            if (!data) {
+                document.getElementById('userListContainer').innerHTML = '<div class="empty">Нет пользователей</div>';
+                return;
+            }
+            allUsers = [];
+            const currentUid = currentUser.uid;
+            for (const uid in data) {
+                if (uid === currentUid) continue; // не показываем себя
+                const u = data[uid];
+                allUsers.push({
+                    uid: uid,
+                    username: u.username || 'Без имени',
+                    verified: u.verified === true,
+                    admin: u.admin === true
+                });
+            }
+            renderUserList(allUsers);
+        });
+        window.usersListener = () => ref.off('value', listener);
+    }
+
+    function renderUserList(users) {
+        const container = document.getElementById('userListContainer');
+        const search = document.getElementById('searchInput').value.toLowerCase().trim();
+        let filtered = users;
+        if (search) {
+            filtered = users.filter(u => u.username.toLowerCase().includes(search));
+        }
+        if (filtered.length === 0) {
+            container.innerHTML = '<div class="empty">Никого не найдено</div>';
+            return;
+        }
+        let html = '';
+        filtered.forEach(u => {
+            const verifiedBadge = u.verified ? '<span class="verified-badge">✓</span>' : '';
+            const adminActions = (isAdmin && u.uid !== currentUser.uid) ? `
+                <div class="admin-actions">
+                    ${!u.verified ? `<button data-uid="${u.uid}" class="give-badge">Выдать галочку</button>` : ''}
                 </div>
-                <div class="card-number" id="cardNumber">.... 4893</div>
-                <div class="card-bottom">
-                    <div class="balance-wrapper">
-                        <span class="balance-label">СЧЁТ</span>
-                        <span class="card-balance" id="cardBalance">$0</span>
+            ` : '';
+            html += `
+                <div class="user-item" data-uid="${u.uid}">
+                    <div class="name">
+                        ${u.username} ${verifiedBadge}
                     </div>
-                    <div class="card-expiry">
-                        <span>VALID THRU</span>
-                        <span id="cardExpiry">12/28</span>
-                    </div>
+                    ${adminActions}
                 </div>
-            </div>
-        </div>
+            `;
+        });
+        container.innerHTML = html;
 
-        <!-- ТРИ КНОПКИ -->
-        <div class="actions">
-            <button class="action-btn" id="depositBtn">
-                <span class="action-icon">
-                    <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                        <line x1="12" y1="5" x2="12" y2="19" />
-                        <line x1="5" y1="12" x2="19" y2="12" />
-                    </svg>
-                </span>
-                <span class="action-label">Пополнить</span>
-            </button>
-            <button class="action-btn" id="transferBtn">
-                <span class="action-icon">
-                    <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M7 17L17 7" />
-                        <path d="M7 7h10v10" />
-                    </svg>
-                </span>
-                <span class="action-label">Перевести</span>
-            </button>
-            <button class="action-btn" id="resetBtn">
-                <span class="action-icon">
-                    <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M3 12a9 9 0 1 0 9-9m0 0v6m0-6h-6" />
-                    </svg>
-                </span>
-                <span class="action-label">Сброс</span>
-            </button>
-        </div>
+        // Клик по пользователю — открыть чат
+        container.querySelectorAll('.user-item').forEach(el => {
+            el.addEventListener('click', function(e) {
+                // Игнорируем клик по кнопкам админа
+                if (e.target.closest('.admin-actions')) return;
+                const uid = this.dataset.uid;
+                const user = allUsers.find(u => u.uid === uid);
+                if (user) openChat(user);
+            });
+        });
 
-        <!-- ИСТОРИЯ -->
-        <div class="history-wrapper">
-            <div class="history-header">
-                <h2>Последние операции</h2>
-                <button class="see-all" id="seeAllBtn">Все</button>
-            </div>
-            <ul class="history-list" id="transactionsList"></ul>
-        </div>
+        // Кнопки выдачи галочки
+        container.querySelectorAll('.give-badge').forEach(btn => {
+            btn.addEventListener('click', async function(e) {
+                e.stopPropagation();
+                const uid = this.dataset.uid;
+                await db.ref('users/' + uid + '/verified').set(true);
+                // также обновим локально
+                const user = allUsers.find(u => u.uid === uid);
+                if (user) user.verified = true;
+                renderUserList(allUsers);
+            });
+        });
+    }
 
-    </div>
+    // Поиск
+    document.getElementById('searchInput').addEventListener('input', function() {
+        renderUserList(allUsers);
+    });
 
-    <!-- МОДАЛКА ПОПОЛНЕНИЯ (центрированная) -->
-    <div class="modal-overlay" id="depositModal">
-        <div class="modal">
-            <div class="modal-header">
-                <h2>Пополнение</h2>
-                <button class="modal-close" id="depositModalClose">✕</button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label>Сумма ($)</label>
-                    <input type="number" id="depositAmount" placeholder="Введите сумму" min="1" step="1" />
+    // ============================================================
+    // 7. ЧАТ
+    // ============================================================
+    let currentChatPartner = null;
+    let currentChatUid = null;
+
+    function openChat(user) {
+        currentChatPartner = user;
+        currentChatUid = user.uid;
+        showPage('chatPage');
+        document.getElementById('chatPartnerName').innerHTML = user.username + (user.verified ? ' <span class="verified-badge">✓</span>' : '');
+        // Загружаем сообщения
+        loadMessages(user.uid);
+        // Слушаем новые сообщения
+        listenMessages(user.uid);
+        // Очищаем поле ввода
+        document.getElementById('messageInput').value = '';
+        document.getElementById('messageInput').focus();
+    }
+
+    // Возврат к списку
+    document.getElementById('backToUsers').addEventListener('click', function() {
+        if (window.messagesListener) window.messagesListener();
+        showPage('usersPage');
+        currentChatPartner = null;
+        currentChatUid = null;
+        document.getElementById('messagesContainer').innerHTML = '';
+    });
+
+    // Отправка сообщения
+    document.getElementById('sendMsgBtn').addEventListener('click', sendMessage);
+    document.getElementById('messageInput').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') sendMessage();
+    });
+
+    async function sendMessage() {
+        const input = document.getElementById('messageInput');
+        const text = input.value.trim();
+        if (!text || !currentChatUid) return;
+        const from = currentUser.uid;
+        const to = currentChatUid;
+        const msgRef = db.ref('messages').push();
+        await msgRef.set({
+            from: from,
+            to: to,
+            text: text,
+            timestamp: Date.now()
+        });
+        input.value = '';
+        // Прокрутка вниз
+        const container = document.getElementById('messagesContainer');
+        setTimeout(() => container.scrollTop = container.scrollHeight, 50);
+    }
+
+    function loadMessages(partnerUid) {
+        // Сначала очищаем, потом слушатель сам подгрузит
+        document.getElementById('messagesContainer').innerHTML = '';
+    }
+
+    function listenMessages(partnerUid) {
+        if (window.messagesListener) window.messagesListener();
+        const ref = db.ref('messages');
+        const listener = ref.orderByChild('timestamp').startAt(Date.now() - 86400000*7) // за последнюю неделю
+            .on('value', function(snapshot) {
+                const data = snapshot.val();
+                if (!data) {
+                    document.getElementById('messagesContainer').innerHTML = '<div class="empty">Нет сообщений</div>';
+                    return;
+                }
+                const messages = [];
+                for (const key in data) {
+                    const m = data[key];
+                    // Показываем только сообщения между текущим пользователем и партнером
+                    if ((m.from === currentUser.uid && m.to === partnerUid) ||
+                        (m.from === partnerUid && m.to === currentUser.uid)) {
+                        messages.push({ key, ...m });
+                    }
+                }
+                // Сортируем по времени
+                messages.sort((a,b) => a.timestamp - b.timestamp);
+                renderMessages(messages);
+            });
+        window.messagesListener = () => ref.off('value', listener);
+    }
+
+    function renderMessages(messages) {
+        const container = document.getElementById('messagesContainer');
+        if (messages.length === 0) {
+            container.innerHTML = '<div class="empty">Нет сообщений</div>';
+            return;
+        }
+        let html = '';
+        messages.forEach(m => {
+            const isSelf = m.from === currentUser.uid;
+            const cls = isSelf ? 'self' : '';
+            const time = formatTime(m.timestamp);
+            html += `
+                <div class="msg ${cls}">
+                    ${m.text}
+                    <span class="time">${time}</span>
                 </div>
-                <button class="modal-btn" id="depositConfirm">Пополнить</button>
-            </div>
-        </div>
-    </div>
+            `;
+        });
+        container.innerHTML = html;
+        container.scrollTop = container.scrollHeight;
+    }
 
-    <!-- МОДАЛКА ПЕРЕВОДА (полноэкранная, с кнопкой назад) -->
-    <div class="modal-overlay" id="transferModal">
-        <div class="modal modal-fullscreen">
-            <div class="modal-header-fullscreen">
-                <button class="back-btn" id="transferModalClose">
-                    <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="15 18 9 12 15 6" />
-                    </svg>
-                </button>
-                <span class="modal-title-fullscreen">Перевод</span>
-                <div style="width:28px;"></div>
-            </div>
-            <div class="modal-body-fullscreen">
-                <div class="form-group">
-                    <label>Получатель</label>
-                    <input type="text" id="transferRecipient" placeholder="Имя или номер" />
-                </div>
-                <div class="form-group">
-                    <label>Сумма ($)</label>
-                    <input type="number" id="transferAmount" placeholder="0" min="0" step="1" />
-                </div>
-                <div class="form-group">
-                    <label>Комментарий</label>
-                    <input type="text" id="transferNote" placeholder="Необязательно" />
-                </div>
-                <button class="modal-btn" id="transferConfirm">Отправить</button>
-            </div>
-        </div>
-    </div>
+    // ============================================================
+    // 8. ЗАПУСК (первоначальная проверка)
+    // ============================================================
+    // Если пользователь уже залогинен, onAuthStateChanged сам всё покажет.
+    // Если нет — покажет страницу входа.
 
-    <script src="script.js"></script>
+    console.log('VibeChat запущен!');
+</script>
 </body>
 </html>
