@@ -1,136 +1,341 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>VibeChat</title>
-    <!-- Firebase Compat SDK (через CDN) -->
+    <!-- Firebase Compat SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
     <style>
+        /* ===== ЭПЛОВСКИЙ ДИЗАЙН ===== */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background: #0a0a0f;
-            color: #e0e0e0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: #000;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             padding: 16px;
+            color: #fff;
         }
+
         .app {
-            background: #13131a;
-            border-radius: 32px;
-            max-width: 480px;
+            background: rgba(30, 30, 38, 0.85);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border-radius: 44px;
+            max-width: 420px;
             width: 100%;
-            padding: 24px 20px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
-            border: 1px solid rgba(255,255,255,0.03);
+            padding: 32px 24px 28px;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.8), 0 0 0 0.5px rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.04);
+            transition: all 0.3s ease;
             min-height: 600px;
             display: flex;
             flex-direction: column;
         }
+
         h1 {
-            font-size: 26px;
-            font-weight: 600;
+            font-size: 34px;
+            font-weight: 700;
             letter-spacing: -0.5px;
-            background: linear-gradient(135deg, #a0ffa0, #40c040);
+            background: linear-gradient(135deg, #5dff8a, #00c853);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 16px;
+            margin-bottom: 20px;
+            padding-top: 4px;
         }
+
         .form-group {
-            margin-bottom: 14px;
+            margin-bottom: 18px;
         }
+
         .form-group label {
             display: block;
             font-size: 13px;
-            font-weight: 500;
-            color: #8888a0;
-            margin-bottom: 4px;
+            font-weight: 600;
+            color: #8e8e9a;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
         }
+
         .form-group input {
             width: 100%;
-            padding: 12px 14px;
-            background: #1c1c26;
-            border: 1px solid rgba(255,255,255,0.06);
-            border-radius: 14px;
-            color: #e0e0e0;
-            font-size: 16px;
+            padding: 16px 18px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            color: #fff;
+            font-size: 17px;
+            font-weight: 400;
             outline: none;
-            transition: border 0.2s;
+            transition: border 0.25s, box-shadow 0.25s;
+            font-family: inherit;
         }
+
         .form-group input:focus {
-            border-color: rgba(100,255,100,0.3);
+            border-color: #30d158;
+            box-shadow: 0 0 0 4px rgba(48, 209, 88, 0.15);
         }
+
+        .form-group input::placeholder {
+            color: #6a6a78;
+            font-weight: 400;
+        }
+
         .btn {
             width: 100%;
-            padding: 14px;
-            background: #2a3a2a;
+            padding: 16px 20px;
+            background: #30d158;
             border: none;
-            border-radius: 60px;
-            color: #80ff80;
-            font-size: 16px;
-            font-weight: 500;
+            border-radius: 40px;
+            color: #fff;
+            font-size: 17px;
+            font-weight: 600;
             cursor: pointer;
-            transition: 0.2s;
-            margin-top: 4px;
+            transition: background 0.2s, transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+            margin-top: 6px;
+            font-family: inherit;
+            letter-spacing: 0.3px;
         }
-        .btn:hover { background: #3a4a3a; }
-        .btn:active { transform: scale(0.96); }
+
+        .btn:active {
+            transform: scale(0.94);
+            background: #28b84b;
+        }
+
         .btn-secondary {
-            background: transparent;
-            border: 1px solid rgba(255,255,255,0.08);
-            color: #8888a0;
-            margin-top: 8px;
+            background: rgba(255,255,255,0.06);
+            color: #8e8e9a;
+            margin-top: 12px;
         }
-        .btn-secondary:hover { background: rgba(255,255,255,0.04); }
+
+        .btn-secondary:active {
+            background: rgba(255,255,255,0.10);
+            transform: scale(0.94);
+        }
+
         .toggle-link {
             text-align: center;
-            margin-top: 12px;
-            color: #8888a0;
-            font-size: 14px;
+            margin-top: 18px;
+            color: #8e8e9a;
+            font-size: 15px;
             cursor: pointer;
+            transition: color 0.2s;
         }
-        .toggle-link span { color: #80ff80; }
-        .hidden { display: none; }
 
-        /* Чат */
-        .chat-header {
+        .toggle-link span {
+            color: #30d158;
+            font-weight: 500;
+        }
+
+        .toggle-link:active span {
+            opacity: 0.6;
+        }
+
+        .error-msg {
+            color: #ff6b6b;
+            font-size: 14px;
+            text-align: center;
+            margin-top: 12px;
+            padding: 8px 12px;
+            background: rgba(255, 107, 107, 0.08);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 107, 107, 0.10);
+            display: none;
+        }
+
+        .error-msg.show {
+            display: block;
+        }
+
+        /* ===== СТРАНИЦЫ ===== */
+        .page {
+            display: none;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .page.active {
+            display: flex;
+        }
+
+        /* ===== СПИСОК ПОЛЬЗОВАТЕЛЕЙ ===== */
+        .top-bar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding-bottom: 12px;
-            border-bottom: 1px solid rgba(255,255,255,0.04);
-            margin-bottom: 12px;
+            margin-bottom: 16px;
+        }
+
+        .top-bar .greeting {
+            font-size: 17px;
+            font-weight: 500;
+        }
+
+        .top-bar .greeting span {
+            color: #30d158;
+        }
+
+        .top-bar .logout-btn {
+            background: none;
+            border: none;
+            color: #8e8e9a;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            padding: 6px 12px;
+            border-radius: 40px;
+            transition: background 0.2s;
+        }
+
+        .top-bar .logout-btn:active {
+            background: rgba(255,255,255,0.05);
+        }
+
+        .search-box {
+            margin-bottom: 16px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 14px;
+            color: #fff;
+            font-size: 16px;
+            outline: none;
+            transition: border 0.2s;
+            font-family: inherit;
+        }
+
+        .search-box input:focus {
+            border-color: rgba(48, 209, 88, 0.3);
+        }
+
+        .search-box input::placeholder {
+            color: #6a6a78;
+        }
+
+        .user-list {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 4px;
+            margin-top: 2px;
+        }
+
+        .user-list::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .user-list::-webkit-scrollbar-thumb {
+            background: #3a3a48;
+            border-radius: 20px;
+        }
+
+        .user-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 16px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 18px;
+            margin-bottom: 6px;
+            cursor: pointer;
+            transition: background 0.15s;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .user-item:active {
+            background: rgba(255,255,255,0.07);
+        }
+
+        .user-item .name {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .verified-badge {
+            background: #30d158;
+            color: #000;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 10px;
+            border-radius: 40px;
+            letter-spacing: 0.3px;
+            display: inline-block;
+        }
+
+        .admin-actions button {
+            background: rgba(255,255,255,0.05);
+            border: none;
+            color: #8e8e9a;
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+            font-family: inherit;
+        }
+
+        .admin-actions button:active {
+            background: rgba(255,255,255,0.10);
+            color: #30d158;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #5a5a68;
+            font-size: 15px;
+            padding: 50px 20px;
+        }
+
+        /* ===== ЧАТ ===== */
+        .chat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 14px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            margin-bottom: 14px;
             flex-shrink: 0;
         }
+
         .chat-header .back {
-            color: #80ff80;
+            color: #30d158;
+            font-size: 24px;
             cursor: pointer;
-            font-size: 14px;
+            line-height: 1;
+            transition: opacity 0.2s;
         }
+
+        .chat-header .back:active {
+            opacity: 0.5;
+        }
+
         .chat-header .partner {
-            font-weight: 500;
+            font-size: 17px;
+            font-weight: 600;
             display: flex;
             align-items: center;
             gap: 6px;
         }
-        .verified-badge {
-            background: #40c040;
-            color: #000;
-            font-size: 10px;
-            font-weight: 700;
-            padding: 2px 8px;
-            border-radius: 40px;
-            letter-spacing: 0.3px;
-        }
+
         .messages {
             flex: 1;
             overflow-y: auto;
@@ -138,184 +343,193 @@
             flex-direction: column;
             gap: 6px;
             padding-right: 4px;
-            margin-bottom: 12px;
-            max-height: 400px;
+            margin-bottom: 14px;
         }
-        .messages::-webkit-scrollbar { width: 3px; }
-        .messages::-webkit-scrollbar-thumb { background: #2c2c3a; border-radius: 10px; }
+
+        .messages::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .messages::-webkit-scrollbar-thumb {
+            background: #3a3a48;
+            border-radius: 20px;
+        }
+
         .msg {
             max-width: 80%;
-            padding: 10px 14px;
-            border-radius: 18px;
-            background: #1c1c26;
-            font-size: 15px;
+            padding: 12px 16px;
+            border-radius: 22px;
+            background: rgba(255,255,255,0.06);
+            font-size: 16px;
             line-height: 1.4;
             align-self: flex-start;
-            border: 1px solid rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.04);
+            animation: fadeIn 0.25s ease;
+            word-break: break-word;
         }
+
         .msg.self {
             align-self: flex-end;
-            background: #2a3a2a;
-            border-color: rgba(100,255,100,0.08);
+            background: #30d158;
+            color: #000;
+            border-color: rgba(48, 209, 88, 0.2);
         }
+
         .msg .time {
-            font-size: 10px;
-            opacity: 0.4;
+            font-size: 11px;
+            opacity: 0.6;
             display: block;
             text-align: right;
-            margin-top: 4px;
+            margin-top: 6px;
+            letter-spacing: 0.2px;
         }
+
+        .msg.self .time {
+            opacity: 0.7;
+        }
+
         .input-row {
             display: flex;
             gap: 10px;
-            background: #1a1a22;
-            padding: 4px 4px 4px 16px;
+            background: rgba(255,255,255,0.05);
+            padding: 4px 4px 4px 18px;
             border-radius: 60px;
-            border: 1px solid rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.06);
             flex-shrink: 0;
+            align-items: center;
         }
+
         .input-row input {
             flex: 1;
             background: transparent;
             border: none;
             outline: none;
-            color: #e0e0e0;
-            font-size: 15px;
-            padding: 10px 0;
+            color: #fff;
+            font-size: 16px;
+            padding: 12px 0;
+            font-family: inherit;
         }
+
+        .input-row input::placeholder {
+            color: #6a6a78;
+        }
+
         .input-row button {
-            background: #2a3a2a;
+            background: #30d158;
             border: none;
-            color: #80ff80;
+            color: #000;
             width: 48px;
+            height: 48px;
             border-radius: 40px;
-            font-size: 20px;
+            font-size: 22px;
             cursor: pointer;
-            transition: 0.2s;
-        }
-        .input-row button:hover { background: #3a4a3a; }
-        .input-row button:active { transform: scale(0.92); }
-
-        /* Список пользователей */
-        .user-list {
-            flex: 1;
-            overflow-y: auto;
-            margin-top: 8px;
-        }
-        .user-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 14px;
-            background: rgba(255,255,255,0.02);
-            border-radius: 16px;
-            margin-bottom: 4px;
-            cursor: pointer;
-            transition: 0.15s;
-        }
-        .user-item:hover { background: rgba(255,255,255,0.05); }
-        .user-item .name {
+            transition: background 0.2s, transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
             display: flex;
             align-items: center;
-            gap: 6px;
-            font-weight: 500;
+            justify-content: center;
         }
-        .user-item .verified-badge { font-size: 9px; padding: 1px 8px; }
-        .admin-actions {
+
+        .input-row button:active {
+            transform: scale(0.90);
+            background: #28b84b;
+        }
+
+        /* ===== АНИМАЦИИ ===== */
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: translateY(8px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideUp {
+            0% { opacity: 0; transform: scale(0.96) translateY(12px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .page.active {
+            animation: slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* ===== АДАПТИВ ===== */
+        @media (max-width: 450px) {
+            .app {
+                border-radius: 28px;
+                padding: 24px 18px 20px;
+                min-height: 95vh;
+            }
+            h1 { font-size: 28px; }
+            .form-group input { padding: 14px 16px; font-size: 16px; }
+            .btn { padding: 14px; font-size: 16px; }
+        }
+
+        @media (min-width: 600px) {
+            .app {
+                padding: 40px 32px 32px;
+            }
+        }
+
+        /* Скрываем страницы по умолчанию */
+        .page {
+            display: none;
+        }
+        .page.active {
             display: flex;
-            gap: 8px;
-        }
-        .admin-actions button {
-            background: rgba(255,255,255,0.05);
-            border: none;
-            color: #8888a0;
-            padding: 4px 10px;
-            border-radius: 30px;
-            font-size: 11px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .admin-actions button:hover { background: rgba(255,255,255,0.1); color: #80ff80; }
-
-        .search-box {
-            margin-bottom: 12px;
-        }
-        .search-box input {
-            width: 100%;
-            padding: 10px 14px;
-            background: #1c1c26;
-            border: 1px solid rgba(255,255,255,0.06);
-            border-radius: 14px;
-            color: #e0e0e0;
-            font-size: 14px;
-            outline: none;
-        }
-        .search-box input:focus { border-color: rgba(100,255,100,0.2); }
-
-        .empty {
-            text-align: center;
-            color: #3a3a44;
-            font-size: 14px;
-            padding: 40px 0;
         }
     </style>
 </head>
 <body>
 <div class="app" id="app">
-    <!-- СТРАНИЦА ВХОДА/РЕГИСТРАЦИИ -->
-    <div id="authPage">
+    <!-- СТРАНИЦА АВТОРИЗАЦИИ -->
+    <div class="page active" id="authPage">
         <h1>VibeChat</h1>
         <div id="authForm">
             <div class="form-group">
                 <label>Имя пользователя</label>
-                <input type="text" id="usernameInput" placeholder="никнейм" />
+                <input type="text" id="usernameInput" placeholder="введите ник" autocomplete="username">
             </div>
             <div class="form-group">
                 <label>Пароль</label>
-                <input type="password" id="passwordInput" placeholder="••••••••" />
+                <input type="password" id="passwordInput" placeholder="минимум 6 символов" autocomplete="current-password">
             </div>
-            <button class="btn" id="loginBtn">Войти</button>
-            <button class="btn btn-secondary" id="registerBtn">Зарегистрироваться</button>
+            <button class="btn" id="mainActionBtn">Войти</button>
             <div class="toggle-link" id="toggleAuthLink">
-                <span>Нет аккаунта? Создать</span>
+                <span>Нет аккаунта? Зарегистрироваться</span>
             </div>
+            <div class="error-msg" id="authError"></div>
         </div>
-        <div id="authError" style="color:#ff6b6b; font-size:14px; margin-top:10px; text-align:center;"></div>
     </div>
 
-    <!-- ЧАТ (появляется после входа) -->
-    <div id="chatPage" class="hidden">
+    <!-- СТРАНИЦА СПИСКА ПОЛЬЗОВАТЕЛЕЙ -->
+    <div class="page" id="usersPage">
+        <div class="top-bar">
+            <div class="greeting">Привет, <span id="greetingUsername"></span></div>
+            <button class="logout-btn" id="logoutBtn">Выйти</button>
+        </div>
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Поиск...">
+        </div>
+        <div class="user-list" id="userListContainer">
+            <div class="empty-state">Загрузка...</div>
+        </div>
+    </div>
+
+    <!-- СТРАНИЦА ЧАТА -->
+    <div class="page" id="chatPage">
         <div class="chat-header">
-            <span class="back" id="backToUsers">←</span>
+            <span class="back" id="backToUsers">‹</span>
             <span class="partner" id="chatPartnerName"></span>
-            <span style="width:40px;"></span>
+            <span style="width:24px;"></span>
         </div>
         <div class="messages" id="messagesContainer"></div>
         <div class="input-row">
-            <input type="text" id="messageInput" placeholder="сообщение..." />
+            <input type="text" id="messageInput" placeholder="Сообщение...">
             <button id="sendMsgBtn">➤</button>
-        </div>
-    </div>
-
-    <!-- СПИСОК ПОЛЬЗОВАТЕЛЕЙ (появляется после входа) -->
-    <div id="usersPage">
-        <h1>VibeChat</h1>
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-            <span style="font-size:14px; color:#8888a0;">Контакты</span>
-            <button id="logoutBtn" style="background:none; border:none; color:#8888a0; font-size:13px; cursor:pointer;">Выйти</button>
-        </div>
-        <div class="search-box">
-            <input type="text" id="searchInput" placeholder="Найти пользователя..." />
-        </div>
-        <div class="user-list" id="userListContainer">
-            <div class="empty">Загрузка...</div>
         </div>
     </div>
 </div>
 
 <script>
     // ============================================================
-    // 1. ВСТАВЬ СВОЙ КОНФИГ FIREBASE
+    // 1. КОНФИГ FIREBASE (замени на свой)
     // ============================================================
     const firebaseConfig = {
         apiKey: "AIzaSyD-axq_SkB8d0ynHZ-lCyxGL3Kk99SVZV8",
@@ -331,15 +545,15 @@
     const db = firebase.database();
 
     // ============================================================
-    // 2. ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+    // 2. ВСПОМОГАТЕЛЬНЫЕ
     // ============================================================
+    function getEmailFromUsername(username) {
+        return username.trim().toLowerCase() + '@vibechat.local';
+    }
+
     function getUsernameFromEmail(email) {
         if (!email) return '';
         return email.split('@')[0];
-    }
-
-    function getEmailFromUsername(username) {
-        return username.toLowerCase().trim() + '@vibechat.local';
     }
 
     function formatTime(timestamp) {
@@ -347,98 +561,140 @@
         return d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0');
     }
 
-    function showAuthError(msg) {
-        document.getElementById('authError').textContent = msg;
+    function showError(msg) {
+        const el = document.getElementById('authError');
+        el.textContent = msg;
+        el.classList.add('show');
+        setTimeout(() => el.classList.remove('show'), 5000);
+    }
+
+    function clearError() {
+        document.getElementById('authError').classList.remove('show');
     }
 
     // ============================================================
     // 3. УПРАВЛЕНИЕ СТРАНИЦАМИ
     // ============================================================
-    const authPage = document.getElementById('authPage');
-    const chatPage = document.getElementById('chatPage');
-    const usersPage = document.getElementById('usersPage');
-
-    function showPage(page) {
-        authPage.classList.add('hidden');
-        chatPage.classList.add('hidden');
-        usersPage.classList.add('hidden');
-        document.getElementById(page).classList.remove('hidden');
+    function showPage(pageId) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById(pageId).classList.add('active');
     }
 
     // ============================================================
-    // 4. АВТОРИЗАЦИЯ
+    // 4. АВТОРИЗАЦИЯ (одна кнопка)
+    // ============================================================
+    let isLoginMode = true;
+
+    const mainBtn = document.getElementById('mainActionBtn');
+    const toggleLink = document.getElementById('toggleAuthLink');
+    const usernameInput = document.getElementById('usernameInput');
+    const passwordInput = document.getElementById('passwordInput');
+
+    function updateUI() {
+        if (isLoginMode) {
+            mainBtn.textContent = 'Войти';
+            toggleLink.innerHTML = '<span>Нет аккаунта? Зарегистрироваться</span>';
+        } else {
+            mainBtn.textContent = 'Зарегистрироваться';
+            toggleLink.innerHTML = '<span>Уже есть аккаунт? Войти</span>';
+        }
+        clearError();
+    }
+
+    toggleLink.addEventListener('click', function() {
+        isLoginMode = !isLoginMode;
+        updateUI();
+    });
+
+    mainBtn.addEventListener('click', async function() {
+        const username = usernameInput.value.trim();
+        const password = passwordInput.value;
+        if (!username || password.length < 6) {
+            showError('Имя обязательно, пароль минимум 6 символов');
+            return;
+        }
+        const email = getEmailFromUsername(username);
+        clearError();
+
+        try {
+            if (isLoginMode) {
+                // Вход
+                await auth.signInWithEmailAndPassword(email, password);
+                // успех — onAuthStateChanged переключит
+            } else {
+                // Регистрация
+                // Сначала проверим, не занят ли username
+                const snapshot = await db.ref('users').orderByChild('username').equalTo(username).once('value');
+                if (snapshot.exists()) {
+                    showError('Это имя уже занято');
+                    return;
+                }
+                // Создаём пользователя
+                const cred = await auth.createUserWithEmailAndPassword(email, password);
+                const uid = cred.user.uid;
+                // Сохраняем в базу
+                await db.ref('users/' + uid).set({
+                    username: username,
+                    verified: false,
+                    admin: false
+                });
+                // Первый пользователь становится админом
+                const countSnap = await db.ref('users').once('value');
+                if (countSnap.numChildren() === 1) {
+                    await db.ref('users/' + uid + '/admin').set(true);
+                    await db.ref('admins/' + uid).set(true);
+                }
+                // После регистрации пользователь уже залогинен
+            }
+        } catch (err) {
+            let msg = err.message;
+            if (err.code === 'auth/user-not-found') msg = 'Пользователь не найден';
+            else if (err.code === 'auth/wrong-password') msg = 'Неверный пароль';
+            else if (err.code === 'auth/email-already-in-use') msg = 'Это имя уже используется';
+            else if (err.code === 'auth/invalid-email') msg = 'Некорректное имя';
+            showError(msg);
+        }
+    });
+
+    // ============================================================
+    // 5. СОСТОЯНИЕ АВТОРИЗАЦИИ
     // ============================================================
     let currentUser = null;
     let currentUsername = '';
     let isAdmin = false;
 
-    // Переключение между входом и регистрацией
-    let isLoginMode = true;
-    document.getElementById('toggleAuthLink').addEventListener('click', function() {
-        isLoginMode = !isLoginMode;
-        const link = this.querySelector('span');
-        if (isLoginMode) {
-            link.textContent = 'Нет аккаунта? Создать';
-            document.getElementById('loginBtn').textContent = 'Войти';
-            document.getElementById('registerBtn').textContent = 'Зарегистрироваться';
-        } else {
-            link.textContent = 'Уже есть аккаунт? Войти';
-            document.getElementById('loginBtn').textContent = 'Войти';
-            document.getElementById('registerBtn').textContent = 'Зарегистрироваться';
-        }
-        showAuthError('');
-    });
-
-    // Регистрация
-    document.getElementById('registerBtn').addEventListener('click', async function() {
-        const username = document.getElementById('usernameInput').value.trim();
-        const password = document.getElementById('passwordInput').value;
-        if (!username || password.length < 6) {
-            showAuthError('Имя и пароль (мин. 6 символов) обязательны');
-            return;
-        }
-        const email = getEmailFromUsername(username);
-        try {
-            const cred = await auth.createUserWithEmailAndPassword(email, password);
-            const uid = cred.user.uid;
-            // Сохраняем данные пользователя
-            await db.ref('users/' + uid).set({
-                username: username,
-                verified: false,
-                admin: false // по умолчанию
-            });
-            // Если это первый пользователь или admin, можно назначить админа
-            // (для демо: первый зарегистрированный становится админом)
-            const snapshot = await db.ref('users').once('value');
-            const count = snapshot.numChildren();
-            if (count === 1) {
-                await db.ref('users/' + uid + '/admin').set(true);
-                await db.ref('admins/' + uid).set(true);
+    auth.onAuthStateChanged(async function(user) {
+        if (user) {
+            currentUser = user;
+            // Получаем данные из базы
+            const snap = await db.ref('users/' + user.uid).once('value');
+            const data = snap.val();
+            if (!data) {
+                // Если нет записи, выходим
+                auth.signOut();
+                return;
             }
-            showAuthError('');
-            document.getElementById('usernameInput').value = '';
-            document.getElementById('passwordInput').value = '';
-        } catch (err) {
-            showAuthError('Ошибка: ' + err.message);
-        }
-    });
+            currentUsername = data.username || getUsernameFromEmail(user.email);
+            isAdmin = data.admin === true;
 
-    // Вход
-    document.getElementById('loginBtn').addEventListener('click', async function() {
-        const username = document.getElementById('usernameInput').value.trim();
-        const password = document.getElementById('passwordInput').value;
-        if (!username || !password) {
-            showAuthError('Введите имя и пароль');
-            return;
-        }
-        const email = getEmailFromUsername(username);
-        try {
-            await auth.signInWithEmailAndPassword(email, password);
-            showAuthError('');
-            document.getElementById('usernameInput').value = '';
-            document.getElementById('passwordInput').value = '';
-        } catch (err) {
-            showAuthError('Неверное имя или пароль');
+            document.getElementById('greetingUsername').textContent = currentUsername;
+            showPage('usersPage');
+            loadUsers();
+            listenUsers();
+        } else {
+            currentUser = null;
+            currentUsername = '';
+            isAdmin = false;
+            showPage('authPage');
+            // Очищаем слушатели
+            if (window.usersListener) window.usersListener();
+            if (window.messagesListener) window.messagesListener();
+            document.getElementById('userListContainer').innerHTML = '<div class="empty-state">Загрузка...</div>';
+            document.getElementById('messagesContainer').innerHTML = '';
+            // Очищаем поля
+            usernameInput.value = '';
+            passwordInput.value = '';
+            clearError();
         }
     });
 
@@ -448,49 +704,9 @@
     });
 
     // ============================================================
-    // 5. ОБРАБОТЧИК СОСТОЯНИЯ АВТОРИЗАЦИИ
-    // ============================================================
-    auth.onAuthStateChanged(async function(user) {
-        if (user) {
-            currentUser = user;
-            // Получаем данные пользователя
-            const snap = await db.ref('users/' + user.uid).once('value');
-            const data = snap.val();
-            if (!data) {
-                // Если по какой-то причине нет записи — выходим
-                auth.signOut();
-                return;
-            }
-            currentUsername = data.username || getUsernameFromEmail(user.email);
-            isAdmin = data.admin === true;
-
-            // Показываем список пользователей
-            showPage('usersPage');
-            loadUsers();
-            // Слушаем изменения пользователей
-            listenUsers();
-            // Загружаем сообщения если чат открыт
-        } else {
-            currentUser = null;
-            currentUsername = '';
-            isAdmin = false;
-            showPage('authPage');
-            // Отписываемся от слушателей
-            if (window.usersListener) window.usersListener();
-            if (window.messagesListener) window.messagesListener();
-            document.getElementById('userListContainer').innerHTML = '<div class="empty">Загрузка...</div>';
-            document.getElementById('messagesContainer').innerHTML = '';
-        }
-    });
-
-    // ============================================================
-    // 6. РАБОТА СО СПИСКОМ ПОЛЬЗОВАТЕЛЕЙ
+    // 6. СПИСОК ПОЛЬЗОВАТЕЛЕЙ
     // ============================================================
     let allUsers = [];
-
-    function loadUsers() {
-        // Просто инициируем загрузку через слушатель
-    }
 
     function listenUsers() {
         if (window.usersListener) window.usersListener();
@@ -498,13 +714,13 @@
         const listener = ref.on('value', function(snapshot) {
             const data = snapshot.val();
             if (!data) {
-                document.getElementById('userListContainer').innerHTML = '<div class="empty">Нет пользователей</div>';
+                document.getElementById('userListContainer').innerHTML = '<div class="empty-state">Нет пользователей</div>';
                 return;
             }
             allUsers = [];
             const currentUid = currentUser.uid;
             for (const uid in data) {
-                if (uid === currentUid) continue; // не показываем себя
+                if (uid === currentUid) continue;
                 const u = data[uid];
                 allUsers.push({
                     uid: uid,
@@ -526,12 +742,12 @@
             filtered = users.filter(u => u.username.toLowerCase().includes(search));
         }
         if (filtered.length === 0) {
-            container.innerHTML = '<div class="empty">Никого не найдено</div>';
+            container.innerHTML = '<div class="empty-state">Никого не найдено</div>';
             return;
         }
         let html = '';
         filtered.forEach(u => {
-            const verifiedBadge = u.verified ? '<span class="verified-badge">✓</span>' : '';
+            const badge = u.verified ? '<span class="verified-badge">✓</span>' : '';
             const adminActions = (isAdmin && u.uid !== currentUser.uid) ? `
                 <div class="admin-actions">
                     ${!u.verified ? `<button data-uid="${u.uid}" class="give-badge">Выдать галочку</button>` : ''}
@@ -539,9 +755,7 @@
             ` : '';
             html += `
                 <div class="user-item" data-uid="${u.uid}">
-                    <div class="name">
-                        ${u.username} ${verifiedBadge}
-                    </div>
+                    <div class="name">${u.username} ${badge}</div>
                     ${adminActions}
                 </div>
             `;
@@ -551,7 +765,6 @@
         // Клик по пользователю — открыть чат
         container.querySelectorAll('.user-item').forEach(el => {
             el.addEventListener('click', function(e) {
-                // Игнорируем клик по кнопкам админа
                 if (e.target.closest('.admin-actions')) return;
                 const uid = this.dataset.uid;
                 const user = allUsers.find(u => u.uid === uid);
@@ -565,7 +778,6 @@
                 e.stopPropagation();
                 const uid = this.dataset.uid;
                 await db.ref('users/' + uid + '/verified').set(true);
-                // также обновим локально
                 const user = allUsers.find(u => u.uid === uid);
                 if (user) user.verified = true;
                 renderUserList(allUsers);
@@ -573,7 +785,6 @@
         });
     }
 
-    // Поиск
     document.getElementById('searchInput').addEventListener('input', function() {
         renderUserList(allUsers);
     });
@@ -591,14 +802,11 @@
         document.getElementById('chatPartnerName').innerHTML = user.username + (user.verified ? ' <span class="verified-badge">✓</span>' : '');
         // Загружаем сообщения
         loadMessages(user.uid);
-        // Слушаем новые сообщения
         listenMessages(user.uid);
-        // Очищаем поле ввода
         document.getElementById('messageInput').value = '';
         document.getElementById('messageInput').focus();
     }
 
-    // Возврат к списку
     document.getElementById('backToUsers').addEventListener('click', function() {
         if (window.messagesListener) window.messagesListener();
         showPage('usersPage');
@@ -607,7 +815,6 @@
         document.getElementById('messagesContainer').innerHTML = '';
     });
 
-    // Отправка сообщения
     document.getElementById('sendMsgBtn').addEventListener('click', sendMessage);
     document.getElementById('messageInput').addEventListener('keydown', function(e) {
         if (e.key === 'Enter') sendMessage();
@@ -627,36 +834,32 @@
             timestamp: Date.now()
         });
         input.value = '';
-        // Прокрутка вниз
         const container = document.getElementById('messagesContainer');
         setTimeout(() => container.scrollTop = container.scrollHeight, 50);
     }
 
     function loadMessages(partnerUid) {
-        // Сначала очищаем, потом слушатель сам подгрузит
         document.getElementById('messagesContainer').innerHTML = '';
     }
 
     function listenMessages(partnerUid) {
         if (window.messagesListener) window.messagesListener();
         const ref = db.ref('messages');
-        const listener = ref.orderByChild('timestamp').startAt(Date.now() - 86400000*7) // за последнюю неделю
+        const listener = ref.orderByChild('timestamp').startAt(Date.now() - 86400000*7)
             .on('value', function(snapshot) {
                 const data = snapshot.val();
                 if (!data) {
-                    document.getElementById('messagesContainer').innerHTML = '<div class="empty">Нет сообщений</div>';
+                    document.getElementById('messagesContainer').innerHTML = '<div class="empty-state">Нет сообщений</div>';
                     return;
                 }
                 const messages = [];
                 for (const key in data) {
                     const m = data[key];
-                    // Показываем только сообщения между текущим пользователем и партнером
                     if ((m.from === currentUser.uid && m.to === partnerUid) ||
                         (m.from === partnerUid && m.to === currentUser.uid)) {
                         messages.push({ key, ...m });
                     }
                 }
-                // Сортируем по времени
                 messages.sort((a,b) => a.timestamp - b.timestamp);
                 renderMessages(messages);
             });
@@ -666,7 +869,7 @@
     function renderMessages(messages) {
         const container = document.getElementById('messagesContainer');
         if (messages.length === 0) {
-            container.innerHTML = '<div class="empty">Нет сообщений</div>';
+            container.innerHTML = '<div class="empty-state">Нет сообщений</div>';
             return;
         }
         let html = '';
@@ -686,12 +889,10 @@
     }
 
     // ============================================================
-    // 8. ЗАПУСК (первоначальная проверка)
+    // 8. ИНИЦИАЛИЗАЦИЯ
     // ============================================================
-    // Если пользователь уже залогинен, onAuthStateChanged сам всё покажет.
-    // Если нет — покажет страницу входа.
-
-    console.log('VibeChat запущен!');
+    updateUI();
+    console.log('VibeChat запущен');
 </script>
 </body>
 </html>
