@@ -2,625 +2,593 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Liquid SuperApp</title>
-  <style id="user-custom-css"></style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VK Messenger Hybrid</title>
   <style>
+    /* --- VK BASE STYLES & VARIABLES --- */
     :root {
-      --vk-blue: #2a75d3;
-      --glass-bg: rgba(255, 255, 255, 0.08);
-      --glass-card: rgba(255, 255, 255, 0.12);
-      --glass-border: rgba(255, 255, 255, 0.15);
-      --glass-blur: blur(25px) saturate(190%);
-      --text-main: #ffffff;
-      --text-sub: #a0a5b5;
-      /* Default WhatsApp Style Wallpaper */
-      --chat-wallpaper: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.03' fill-rule='evenodd'%3E%3Cpath d='M11 0l3 3-3 3-3-3 3-3zm28 0l3 3-3 3-3-3 3-3zm28 0l3 3-3 3-3-3 3-3kM0 11l3 3-3 3-3-3 3-3zm28 11l3 3-3 3-3-3 3-3zm28 0l3 3-3 3-3-3 3-3zM11 28l3 3-3 3-3-3 3-3zm28 0l3 3-3 3-3-3 3-3zm28 0l3 3-3 3-3-3 3-3z'/%3E%3C/g%3E%3C/svg%3E"), linear-gradient(135deg, #0e1621 0%, #17212b 100%);
+      --vk-blue: #0077ff;
+      --vk-blue-hover: #0066cc;
+      --vk-bg: #edf0f5;
+      --vk-card-bg: #ffffff;
+      --vk-text-primary: #000000;
+      --vk-text-secondary: #818c99;
+      --vk-border: #e7e8ec;
+      --vk-header-height: 48px;
+      --chat-bg: #e5ddd5; /* WhatsApp default chat tone */
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
-    body { background: #0a0a0c; height: 100vh; display: flex; justify-content: center; align-items: center; color: var(--text-main); overflow: hidden; }
-
-    /* Vector Icons */
-    .svg-icon { width: 22px; height: 22px; fill: currentColor; display: inline-block; vertical-align: middle; flex-shrink: 0; }
-    .verified-badge { width: 16px; height: 16px; fill: #2a75d3; vertical-align: middle; margin-left: 4px; display: inline-block; }
-
-    /* Main App Layout */
-    .app { width: 100vw; height: 100vh; display: flex; background: rgba(0, 0, 0, 0.4); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); }
-    @media (min-width: 900px) {
-      .app { width: 95vw; height: 90vh; border-radius: 20px; border: 1px solid var(--glass-border); box-shadow: 0 30px 60px rgba(0,0,0,0.6); }
+    [data-theme="dark"] {
+      --vk-bg: #0a0a0c;
+      --vk-card-bg: #19191a;
+      --vk-text-primary: #e1e3e6;
+      --vk-text-secondary: #76787a;
+      --vk-border: #2c2d2e;
+      --chat-bg: #0b141a;
     }
 
-    /* 1. Left Servers Bar (Discord Style) */
-    .servers-bar { width: 70px; background: rgba(0, 0, 0, 0.35); display: flex; flex-direction: column; align-items: center; padding: 12px 0; gap: 12px; border-right: 1px solid var(--glass-border); flex-shrink: 0; z-index: 10; }
-    .server-btn { width: 48px; height: 48px; border-radius: 24px; background: var(--glass-bg); cursor: pointer; transition: 0.3s cubic-bezier(0.1, 0.9, 0.2, 1); display: flex; align-items: center; justify-content: center; border: 2px solid transparent; color: var(--text-main); }
-    .server-btn:hover, .server-btn.active { border-radius: 14px; border-color: var(--vk-blue); background: var(--vk-blue); }
-    .server-btn img { width: 100%; height: 100%; border-radius: inherit; object-fit: cover; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "VK Sans Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    body { background-color: var(--vk-bg); color: var(--vk-text-primary); display: flex; height: 100vh; overflow: hidden; }
 
-    /* 2. Sidebar (TG + VK Style) */
-    .sidebar { width: 300px; background: var(--glass-bg); display: flex; flex-direction: column; border-right: 1px solid var(--glass-border); flex-shrink: 0; z-index: 9; }
-    .sidebar-header { padding: 14px; border-bottom: 1px solid var(--glass-border); display: flex; flex-direction: column; gap: 12px; }
-    .top-controls { display: flex; justify-content: space-between; align-items: center; }
+    /* --- LAYOUT: DISCORD + TG + VK HYBRID --- */
+    #app-container { display: flex; width: 100vw; height: 100vh; }
+
+    /* Left Nav Rail (Discord Servers / VK Quick Nav) */
+    .vk-rail {
+      width: 64px;
+      background: var(--vk-card-bg);
+      border-right: 1px solid var(--vk-border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 12px 0;
+      gap: 12px;
+      z-index: 10;
+    }
+    .rail-btn {
+      width: 44px; height: 44px; border-radius: 50%;
+      background: var(--vk-bg); display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all 0.2s ease; border: none; fill: var(--vk-text-secondary);
+    }
+    .rail-btn:hover, .rail-btn.active { background: var(--vk-blue); fill: #fff; border-radius: 14px; }
+
+    /* Middle Panel: Chats, Search & Favorites */
+    .vk-sidebar {
+      width: 320px;
+      background: var(--vk-card-bg);
+      border-right: 1px solid var(--vk-border);
+      display: flex;
+      flex-direction: column;
+    }
+    .sidebar-header {
+      padding: 12px;
+      border-bottom: 1px solid var(--vk-border);
+    }
+    .search-box {
+      position: relative;
+      width: 100%;
+    }
+    .search-box input {
+      width: 100%;
+      padding: 8px 12px 8px 36px;
+      border-radius: 8px;
+      border: 1px solid var(--vk-border);
+      background: var(--vk-bg);
+      color: var(--vk-text-primary);
+      outline: none;
+    }
+    .search-box svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); fill: var(--vk-text-secondary); width: 18px; height: 18px; }
+
+    .chat-list { flex: 1; overflow-y: auto; }
+    .chat-item {
+      display: flex; align-items: center; padding: 10px 12px; gap: 12px;
+      cursor: pointer; transition: background 0.15s ease; border-bottom: 1px solid rgba(0,0,0,0.02);
+    }
+    .chat-item:hover, .chat-item.active { background: rgba(0, 119, 255, 0.08); }
+    .avatar-wrapper { position: relative; width: 44px; height: 44px; flex-shrink: 0; }
+    .avatar-wrapper img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+    .status-indicator { position: absolute; bottom: 0; right: 0; width: 12px; height: 12px; background: #4bb34b; border: 2px solid var(--vk-card-bg); border-radius: 50%; }
     
-    /* Search Box */
-    .search-box { position: relative; width: 100%; }
-    .search-box input { width: 100%; background: rgba(0, 0, 0, 0.3); border: 1px solid var(--glass-border); padding: 10px 14px 10px 38px; border-radius: 14px; color: #fff; outline: none; font-size: 14px; transition: 0.2s; }
-    .search-box input:focus { border-color: var(--vk-blue); background: rgba(0,0,0,0.5); }
-    .search-box .svg-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); opacity: 0.5; width: 18px; height: 18px; }
+    .chat-info { flex: 1; min-width: 0; }
+    .chat-name-row { display: flex; align-items: center; gap: 4px; }
+    .chat-name { font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .verified-badge { fill: var(--vk-blue); width: 16px; height: 16px; flex-shrink: 0; }
+    .custom-status-icon { width: 16px; height: 16px; border-radius: 3px; object-fit: cover; }
+    .chat-last-msg { font-size: 12px; color: var(--vk-text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
 
-    .chat-list { flex: 1; overflow-y: auto; padding: 8px; }
-    .chat-item { padding: 10px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: 0.2s; border-radius: 12px; margin-bottom: 4px; }
-    .chat-item:hover, .chat-item.active { background: var(--glass-card); }
+    /* Main Chat Window */
+    .vk-chat-window {
+      flex: 1; display: flex; flex-direction: column; background-color: var(--vk-bg); position: relative;
+    }
+    .chat-header {
+      height: var(--vk-header-height); background: var(--vk-card-bg);
+      border-bottom: 1px solid var(--vk-border); display: flex; align-items: center;
+      padding: 0 16px; justify-content: space-between; z-index: 5;
+    }
+    .chat-header-user { display: flex; align-items: center; gap: 10px; }
 
-    /* Avatars */
-    .avatar-wrap { position: relative; width: 46px; height: 46px; flex-shrink: 0; }
-    .avatar { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
-    .nick-emoji { width: 20px; height: 20px; object-fit: contain; vertical-align: middle; margin-left: 4px; border-radius: 4px; }
+    .chat-messages {
+      flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;
+      background-size: cover; background-position: center; position: relative;
+    }
+    /* WhatsApp Pattern Overlay Simulation */
+    .chat-messages::before {
+      content: ''; position: absolute; top:0; left:0; right:0; bottom:0;
+      background-image: radial-gradient(var(--vk-text-secondary) 0.5px, transparent 0.5px);
+      background-size: 16px 16px; opacity: 0.1; pointer-events: none;
+    }
 
-    /* 3. Chat Window */
-    .chat-window { flex: 1; display: flex; flex-direction: column; background: var(--chat-wallpaper); background-size: cover; background-position: center; position: relative; }
-    .chat-header { padding: 14px 20px; background: rgba(15, 15, 20, 0.75); backdrop-filter: blur(20px); border-bottom: 1px solid var(--glass-border); display: flex; align-items: center; justify-content: space-between; z-index: 5; }
-    .messages-container { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+    .message-bubble {
+      max-width: 65%; padding: 8px 12px; border-radius: 12px; font-size: 14px; line-height: 1.4;
+      position: relative; word-wrap: break-word; z-index: 2; box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+    .message-bubble.incoming { background: var(--vk-card-bg); align-self: flex-start; border-bottom-left-radius: 2px; }
+    .message-bubble.outgoing { background: var(--vk-blue); color: #fff; align-self: flex-end; border-bottom-right-radius: 2px; }
+    .message-bubble.sticker { background: transparent !important; box-shadow: none !important; padding: 0; }
+    .message-bubble.sticker img { max-width: 160px; max-height: 160px; object-fit: contain; }
+    .message-media { max-width: 100%; border-radius: 8px; margin-top: 4px; }
+    .inline-emoji { width: 20px; height: 20px; vertical-align: middle; }
 
-    /* Bubbles */
-    .msg { max-width: 75%; padding: 12px 16px; border-radius: 18px; font-size: 15px; line-height: 1.4; background: rgba(30, 35, 45, 0.85); backdrop-filter: blur(8px); border: 1px solid var(--glass-border); position: relative; word-break: break-word; }
-    .msg.me { align-self: flex-end; background: linear-gradient(135deg, #2a75d3, #1c5296); border: none; border-bottom-right-radius: 4px; }
-    .msg:not(.me) { align-self: flex-start; border-bottom-left-radius: 4px; }
-    
-    .msg-header { display: flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 700; margin-bottom: 6px; }
-    .msg-media { max-width: 100%; max-height: 350px; border-radius: 12px; margin-top: 8px; object-fit: cover; display: block; }
-    .inline-emoji { width: 22px; height: 22px; vertical-align: middle; display: inline-block; object-fit: contain; margin: 0 2px; }
+    /* Input Area */
+    .chat-input-area {
+      padding: 12px; background: var(--vk-card-bg); border-top: 1px solid var(--vk-border);
+      display: flex; align-items: center; gap: 8px; z-index: 5;
+    }
+    .input-wrapper { flex: 1; display: flex; align-items: center; background: var(--vk-bg); border-radius: 20px; padding: 4px 12px; border: 1px solid var(--vk-border); }
+    .input-wrapper input { flex: 1; border: none; background: transparent; padding: 8px; outline: none; color: var(--vk-text-primary); }
 
-    /* Sticker Message Mode */
-    .msg-sticker { background: transparent !important; border: none !important; backdrop-filter: none !important; box-shadow: none !important; padding: 0 !important; }
-    .msg-sticker .msg-media { max-width: 200px; max-height: 200px; object-fit: contain; filter: drop-shadow(0 8px 16px rgba(0,0,0,0.4)); margin: 0; }
-    .msg-sticker .msg-header { display: none; }
+    .action-btn { background: none; border: none; cursor: pointer; fill: var(--vk-text-secondary); display: flex; align-items: center; justify-content: center; padding: 6px; border-radius: 50%; }
+    .action-btn:hover { background: rgba(0,0,0,0.05); fill: var(--vk-blue); }
 
-    /* Input Panel */
-    .input-bar { padding: 14px; background: rgba(15, 15, 20, 0.85); backdrop-filter: blur(20px); border-top: 1px solid var(--glass-border); display: flex; gap: 10px; align-items: center; position: relative; z-index: 10; }
-    .input-bar input[type="text"] { flex: 1; background: rgba(0, 0, 0, 0.4); border: 1px solid var(--glass-border); padding: 12px 18px; border-radius: 24px; color: #fff; outline: none; font-size: 15px; transition: 0.2s; }
-    .input-bar input[type="text"]:focus { border-color: var(--vk-blue); }
-    
-    .btn { background: var(--vk-blue); color: #fff; border: none; padding: 10px 16px; border-radius: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: 600; transition: opacity 0.2s, transform 0.1s; }
-    .btn:active { opacity: 0.8; transform: scale(0.95); }
-    .btn.icon-only { padding: 10px; border-radius: 50%; background: var(--glass-bg); border: 1px solid var(--glass-border); }
-    .btn.icon-only:hover { background: rgba(255,255,255,0.15); }
-    .btn.toggle-active { background: #38a169; border-color: #38a169; }
+    /* Custom Panels / Modals */
+    .panel-overlay {
+      position: absolute; top:0; left:0; width:100%; height:100%;
+      background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 100;
+    }
+    .panel-card {
+      background: var(--vk-card-bg); width: 480px; max-width: 90vw; max-height: 85vh; border-radius: 12px;
+      border: 1px solid var(--vk-border); display: flex; flex-direction: column; overflow: hidden;
+    }
+    .panel-header { padding: 12px 16px; border-bottom: 1px solid var(--vk-border); display: flex; justify-content: space-between; align-items: center; font-weight: 600; }
+    .panel-body { padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
 
-    /* Universal Picker (Stickers & Emojis) */
-    .picker-panel { position: absolute; bottom: 75px; left: 14px; background: rgba(20, 20, 25, 0.95); border: 1px solid var(--glass-border); border-radius: 16px; width: 320px; max-height: 300px; display: flex; flex-direction: column; z-index: 100; backdrop-filter: blur(25px); box-shadow: 0 10px 30px rgba(0,0,0,0.5); overflow: hidden; display: none; }
-    .picker-tabs { display: flex; border-bottom: 1px solid var(--glass-border); background: rgba(0,0,0,0.2); }
-    .picker-tab { flex: 1; text-align: center; padding: 12px; cursor: pointer; font-size: 13px; font-weight: bold; opacity: 0.5; transition: 0.2s; }
-    .picker-tab.active { opacity: 1; border-bottom: 2px solid var(--vk-blue); background: rgba(255,255,255,0.05); }
-    .picker-content { padding: 12px; overflow-y: auto; flex: 1; display: grid; gap: 8px; }
-    .grid-emojis { grid-template-columns: repeat(5, 1fr); }
-    .grid-stickers { grid-template-columns: repeat(4, 1fr); }
-    .picker-item { width: 100%; aspect-ratio: 1; object-fit: contain; cursor: pointer; border-radius: 8px; transition: transform 0.2s; }
-    .picker-item:hover { transform: scale(1.15); background: rgba(255,255,255,0.1); }
+    /* Nitro/TG Premium Banner Customizer */
+    .profile-banner-preview { height: 80px; border-radius: 8px; background: linear-gradient(135deg, var(--vk-blue), #9c27b0); position: relative; margin-bottom: 30px; }
+    .profile-avatar-preview { width: 60px; height: 60px; border-radius: 50%; border: 3px solid var(--vk-card-bg); position: absolute; bottom: -20px; left: 16px; object-fit: cover; }
 
-    /* 4. Members Bar */
-    .members-bar { width: 220px; background: var(--glass-bg); border-left: 1px solid var(--glass-border); padding: 14px; display: none; flex-shrink: 0; }
-    @media (min-width: 1100px) { .members-bar { display: block; } }
-    .member-item { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; font-size: 14px; font-weight: 600; cursor: pointer; }
-    .member-item:hover { opacity: 0.8; }
+    textarea.css-editor { width: 100%; height: 160px; background: #1e1e1e; color: #00ff66; font-family: monospace; padding: 10px; border-radius: 8px; border: none; resize: vertical; }
 
-    /* Modals */
-    .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(15px); display: flex; justify-content: center; align-items: center; z-index: 1000; }
-    .modal { background: rgba(25, 25, 30, 0.95); border: 1px solid var(--glass-border); padding: 28px; border-radius: 24px; width: 90%; max-width: 480px; display: flex; flex-direction: column; gap: 14px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
-    .modal input, .modal textarea { background: rgba(0,0,0,0.5); border: 1px solid var(--glass-border); padding: 12px; border-radius: 12px; color: #fff; width: 100%; outline: none; font-size: 14px; }
-    .modal textarea { height: 80px; resize: none; font-family: monospace; }
+    /* Nitro/Premium Badges */
+    .role-badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: rgba(0, 119, 255, 0.1); color: var(--vk-blue); font-weight:bold; }
   </style>
+
+  <!-- User injected custom CSS -->
+  <style id="user-custom-css"></style>
 </head>
 <body>
 
-  <!-- Auth Modal -->
-  <div class="modal-overlay" id="authModal">
-    <div class="modal">
-      <h2 style="margin-bottom: 10px;">Вход / Регистрация</h2>
-      <input type="text" id="authUser" placeholder="Уникальный никнейм">
-      <input type="password" id="authPass" placeholder="Пароль">
-      <div style="border-top: 1px solid rgba(255,255,255,0.1); margin: 10px 0;"></div>
-      <label style="font-size:12px; opacity:0.7;">Настройки Базы Данных (GitHub API):</label>
-      <input type="text" id="ghRepo" placeholder="user/repository">
-      <input type="password" id="ghToken" placeholder="GitHub Token (ghp_...)">
-      <button class="btn" style="margin-top: 10px;" onclick="login()">Войти в SuperApp</button>
+<div id="app-container">
+  <!-- LEFT RAIL: Navigation (Discord/VK Hybrid) -->
+  <div class="vk-rail">
+    <button class="rail-btn active" title="Мессенджер" onclick="switchTab('chats')">
+      <svg width="24" height="24" viewBox="0 0 24 24"><path d="M12 3C6.477 3 2 6.979 2 11.889c0 2.825 1.502 5.342 3.86 7.001-.176.883-.756 2.457-2.091 3.493 0 0 2.922 0 5.253-1.637.951.26 1.948.403 2.978.403 5.523 0 10-3.979 10-8.889C22 6.979 17.523 3 12 3z"/></svg>
+    </button>
+    <button class="rail-btn" title="Избранное" onclick="openFavorites()">
+      <svg width="24" height="24" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+    </button>
+    <button class="rail-btn" title="Эмодзи и Стикеры" onclick="toggleModal('emoji-modal')">
+      <svg width="24" height="24" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"/></svg>
+    </button>
+    <button class="rail-btn" title="Настройки / Nitro & Premium" onclick="toggleModal('settings-modal')">
+      <svg width="24" height="24" viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+    </button>
+  </div>
+
+  <!-- MIDDLE PANEL: Chats List & Global Search -->
+  <div class="vk-sidebar">
+    <div class="sidebar-header">
+      <div class="search-box">
+        <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+        <input type="text" id="global-search" placeholder="Поиск (юзеры, чаты)..." oninput="handleSearch(this.value)">
+      </div>
+    </div>
+    <div class="chat-list" id="chat-list-container">
+      <!-- Populated dynamically -->
     </div>
   </div>
 
-  <!-- Settings Modal -->
-  <div class="modal-overlay" id="settingsModal" style="display:none;">
-    <div class="modal" style="max-height: 90vh; overflow-y: auto;">
-      <h2>Настройки Профиля</h2>
-      
-      <label style="font-size:12px; opacity:0.8;">Аватар (URL картинки):</label>
-      <input type="text" id="setAvatar" placeholder="https://...">
-      
-      <label style="font-size:12px; opacity:0.8;">Premium Эмодзи/GIF в нике (100x100):</label>
-      <input type="text" id="setEmoji" placeholder="https://...">
-      
-      <label style="font-size:12px; opacity:0.8;">Градиент профиля (CSS linear-gradient):</label>
-      <input type="text" id="setBg" placeholder="linear-gradient(to right, #ff0000, #0000ff)">
-      
-      <label style="font-size:12px; opacity:0.8;">Локальные обои чата (URL):</label>
-      <input type="text" id="setWallpaper" placeholder="https://...">
-      
-      <label style="font-size:12px; opacity:0.8;">Локальный Custom CSS (Редактор темы):</label>
-      <textarea id="setCustomCss" placeholder="body { background: #000; }"></textarea>
-      
-      <div style="display:flex; gap:10px; margin-top:10px;">
-        <button class="btn" style="flex:1;" onclick="saveProfile()">Сохранить</button>
-        <button class="btn" style="background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2);" onclick="toggleModal('settingsModal', false)">Закрыть</button>
+  <!-- RIGHT PANEL: Active Chat -->
+  <div class="vk-chat-window">
+    <div class="chat-header">
+      <div class="chat-header-user" id="current-chat-header">
+        <span class="chat-name">Выберите чат</span>
       </div>
+    </div>
+
+    <div class="chat-messages" id="chat-messages-container">
+      <!-- Messages appear here -->
+    </div>
+
+    <!-- Chat Input Bar -->
+    <div class="chat-input-area">
+      <label class="action-btn" title="Прикрепить фото / файл">
+        <input type="file" id="file-input" style="display:none" onchange="handleFileUpload(event)">
+        <svg width="22" height="22" viewBox="0 0 24 24"><path d="M16.5 6v11.5c0 2.21-1.79 4-4 4s-4-1.79-4-4V5c0-1.38 1.12-2.5 2.5-2.5s2.5 1.12 2.5 2.5v10.5c0 .55-.45 1-1 1s-1-.45-1-1V6H10v9.5c0 1.38 1.12 2.5 2.5 2.5s2.5-1.12 2.5-2.5V5c0-2.21-1.79-4-4-4s-4 1.79-4 4v12.5c0 3.04 2.46 5.5 5.5 5.5s5.5-2.46 5.5-5.5V6h-1.5z"/></svg>
+      </label>
+
+      <!-- Toggle Sticker Sending Mode -->
+      <label style="display:flex; align-items:center; gap:4px; font-size:12px; color:var(--vk-text-secondary); cursor:pointer;">
+        <input type="checkbox" id="sticker-mode-toggle"> Стикер
+      </label>
+
+      <div class="input-wrapper">
+        <input type="text" id="message-input" placeholder="Напишите сообщение..." onkeydown="if(event.key==='Enter') sendMessage()">
+      </div>
+
+      <button class="action-btn" onclick="sendMessage()" title="Отправить">
+        <svg width="22" height="22" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+      </button>
     </div>
   </div>
+</div>
 
-  <!-- Main App -->
-  <div class="app">
-    
-    <!-- Servers (Left) -->
-    <div class="servers-bar" id="serversBar">
-      <div class="server-btn active" onclick="switchTab('direct')">
-        <svg class="svg-icon" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM9 11H7V9h2v2zm4 0h-2V9h2v2zm4 0h-2V9h2v2z"/></svg>
-      </div>
+<!-- MODAL 1: SETTINGS & CUSTOM CSS & PROFILE -->
+<div class="panel-overlay" id="settings-modal">
+  <div class="panel-card">
+    <div class="panel-header">
+      <span>Настройки профиля & VK Nitro</span>
+      <button class="action-btn" onclick="toggleModal('settings-modal')">
+        <svg width="20" height="20" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+      </button>
     </div>
-
-    <!-- Sidebar -->
-    <div class="sidebar">
-      <div class="sidebar-header">
-        <div class="top-controls">
-          <span style="font-weight:bold; font-size:18px;" id="sidebarTitle">Чаты</span>
-          <button class="btn icon-only" onclick="toggleModal('settingsModal', true)" title="Настройки">
-            <svg class="svg-icon" style="width:18px; height:18px;" viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .43-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.49-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
-          </button>
-        </div>
-        <div class="search-box">
-          <svg class="svg-icon" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
-          <input type="text" id="searchInput" placeholder="Поиск чатов и людей..." oninput="renderChats()">
-        </div>
-      </div>
-      <div class="chat-list" id="chatList"></div>
-    </div>
-
-    <!-- Chat Area -->
-    <div class="chat-window">
-      <div class="chat-header">
-        <div style="display:flex; align-items:center; gap:12px;">
-          <img src="" id="currentChatAvatar" class="avatar" style="width:40px; height:40px;" style="display:none;">
-          <div>
-            <h3 id="currentChatName">Выберите чат</h3>
-            <span style="font-size:12px; opacity:0.6;" id="currentChatSub"></span>
-          </div>
-        </div>
-      </div>
-      
-      <div class="messages-container" id="msgs"></div>
-
-      <!-- Sticker / Emoji Picker -->
-      <div class="picker-panel" id="pickerPanel">
-        <div class="picker-tabs">
-          <div class="picker-tab active" onclick="switchPicker('emojis')">Текст Эмодзи</div>
-          <div class="picker-tab" onclick="switchPicker('stickers')">Стикеры</div>
-        </div>
-        <div class="picker-content grid-emojis" id="pickerContent"></div>
+    <div class="panel-body">
+      <!-- Profile Customization -->
+      <div class="profile-banner-preview" id="preview-banner">
+        <img src="" id="preview-avatar" class="profile-avatar-preview" alt="Avatar">
       </div>
 
-      <div class="input-bar">
-        <button class="btn icon-only" onclick="togglePicker()" id="pickerBtn">
-          <svg class="svg-icon" viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM8.5 8c.83 0 1.5.67 1.5 1.5S9.33 11 8.5 11 7 10.33 7 9.5 7.67 8 8.5 8zm3.5 9.5c-2.33 0-4.31-1.46-5.11-3.5h10.22c-.8 2.04-2.78 3.5-5.11 3.5zm3.5-6.5c-.83 0-1.5-.67-1.5-1.5S14.67 8 15.5 8s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
-        </button>
-        <input type="text" id="msgInput" placeholder="Введите сообщение... (или URL картинки/видео)" onkeydown="if(event.key==='Enter') sendMsg()">
-        <button class="btn" onclick="sendMsg()">
-          <svg class="svg-icon" style="width:20px;height:20px;" viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-        </button>
-      </div>
-    </div>
+      <label>Никнейм:</label>
+      <input type="text" id="setting-username" style="padding:8px; border-radius:6px; border:1px solid var(--vk-border);">
 
-    <!-- Members (Right) -->
-    <div class="members-bar" id="membersBar">
-      <h4 style="margin-bottom:14px; opacity:0.8; font-size:13px; text-transform:uppercase;">Участники</h4>
-      <div id="membersList"></div>
+      <label>Кастомный эмодзи/GIF в нике (URL):</label>
+      <input type="text" id="setting-status-emoji" placeholder="https://.../gif_100x100.gif" style="padding:8px; border-radius:6px; border:1px solid var(--vk-border);">
+
+      <label>URL Аватарки (GIF / PNG):</label>
+      <input type="text" id="setting-avatar-url" placeholder="https://..." style="padding:8px; border-radius:6px; border:1px solid var(--vk-border);">
+
+      <label>Цвет баннера / Градиент профиля:</label>
+      <input type="text" id="setting-banner-color" placeholder="linear-gradient(135deg, #0077ff, #ff007f)" style="padding:8px; border-radius:6px; border:1px solid var(--vk-border);">
+
+      <label>Обои чата (WhatsApp стиль / Ссылка / Файл):</label>
+      <input type="file" accept="image/*" onchange="uploadLocalWallpaper(event)">
+
+      <hr style="border:none; border-top:1px solid var(--vk-border); margin:8px 0;">
+
+      <!-- Custom CSS Editor -->
+      <label>Редактор локального CSS (сохраняется у вас):</label>
+      <textarea id="setting-custom-css" class="css-editor" placeholder="/* Напишите ваш CSS код тут */&#10;body { --vk-blue: #ff0055; }"></textarea>
+
+      <button onclick="saveSettings()" style="padding:10px; background:var(--vk-blue); color:#fff; border:none; border-radius:8px; cursor:pointer; font-weight:600;">Сохранить настройки</button>
     </div>
   </div>
+</div>
 
-  <script>
-    let db = { users: [], chats: [], emojiPacks: [], stickerPacks: [] };
-    let currentUser = null;
-    let currentChatId = null;
-    let currentTab = 'direct';
-    let pickerMode = 'emojis';
-    
-    // DB & Auth Logic
-    async function loadDB() {
-      const repo = localStorage.getItem('ghRepo');
-      const token = localStorage.getItem('ghToken');
-      if (!repo || !token) return;
-      try {
-        const res = await fetch(`https://api.github.com/repos/${repo}/contents/db.json`, {
-          headers: { "Authorization": `token ${token}` }
-        });
-        if (res.ok) {
-          const data = await res.json();
-          db = JSON.parse(decodeURIComponent(escape(atob(data.content))));
-          localStorage.setItem('ghSha', data.sha);
-        }
-      } catch (e) { console.error("Error loading DB", e); }
-    }
+<!-- MODAL 2: EMOJI & STICKER PACKS -->
+<div class="panel-overlay" id="emoji-modal">
+  <div class="panel-card">
+    <div class="panel-header">
+      <span>Открытые Эмодзи и Стикер-паки</span>
+      <button class="action-btn" onclick="toggleModal('emoji-modal')">
+        <svg width="20" height="20" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+      </button>
+    </div>
+    <div class="panel-body" id="emoji-packs-container">
+      <!-- Dynamic Packs Loaded Here -->
+    </div>
+  </div>
+</div>
 
-    async function saveDB() {
-      const repo = localStorage.getItem('ghRepo');
-      const token = localStorage.getItem('ghToken');
-      const sha = localStorage.getItem('ghSha');
-      if (!repo || !token) return;
-      try {
-        const content = btoa(unescape(encodeURIComponent(JSON.stringify(db))));
-        const res = await fetch(`https://api.github.com/repos/${repo}/contents/db.json`, {
-          method: "PUT",
-          headers: { "Authorization": `token ${token}`, "Content-Type": "application/json" },
-          body: JSON.stringify({ message: "Update DB", content, sha })
-        });
-        const data = await res.json();
-        if (data.content && data.content.sha) localStorage.setItem('ghSha', data.content.sha);
-      } catch (e) { console.error("Save error", e); }
-    }
+<script>
+/* --- CORE STATE MANAGEMENT (JSON STORAGE) --- */
+let DB = {
+  users: JSON.parse(localStorage.getItem('vk_users')) || [],
+  messages: JSON.parse(localStorage.getItem('vk_messages')) || {},
+  currentUser: JSON.parse(localStorage.getItem('vk_current_user')) || null,
+  activeChatId: 'favorites',
+  emojiPacks: []
+};
 
-    async function login() {
-      const u = document.getElementById('authUser').value.trim();
-      const p = document.getElementById('authPass').value.trim();
-      const r = document.getElementById('ghRepo').value.trim();
-      const t = document.getElementById('ghToken').value.trim();
-      
-      if(!u || !p || !r || !t) return alert("Заполните все поля!");
-      
-      localStorage.setItem('ghRepo', r);
-      localStorage.setItem('ghToken', t);
-      await loadDB();
+// SVG Durov Verification Badge
+const DUROV_VERIFIED_SVG = `<svg class="verified-badge" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>`;
 
-      let user = db.users.find(x => x.name === u);
-      if (!user) {
-        user = {
-          name: u, pass: p, isVerified: db.users.length === 0,
-          avatar: `https://i.pravatar.cc/150?u=${u}`,
-          emoji: "", bg: "", roleColor: "#ffffff"
-        };
-        db.users.push(user);
-        await saveDB();
-      } else if (user.pass !== p) {
-        return alert("Неверный пароль!");
-      }
+// Initialize Application
+window.addEventListener('DOMContentLoaded', () => {
+  initUserSession();
+  loadCustomCSS();
+  loadWallpaper();
+  renderChatList();
+  renderActiveChat();
+  loadEmojiPacks();
+});
 
-      currentUser = user;
-      localStorage.setItem('authUser', u);
-      document.getElementById('authModal').style.display = 'none';
-      applyLocalSettings();
-      renderApp();
-    }
-
-    // App Initialization
-    window.onload = async () => {
-      const u = localStorage.getItem('authUser');
-      if (u && localStorage.getItem('ghRepo') && localStorage.getItem('ghToken')) {
-        await loadDB();
-        currentUser = db.users.find(x => x.name === u);
-        if(currentUser) {
-          document.getElementById('authModal').style.display = 'none';
-          applyLocalSettings();
-          renderApp();
-          setInterval(refreshMsgs, 5000);
-        }
-      }
+/* --- AUTH & USER SEEDING --- */
+function initUserSession() {
+  if (DB.users.length === 0) {
+    // First Registered User -> Gets Telegram/Durov Badge!
+    const durovUser = {
+      id: 'user_1',
+      username: 'Pavel_Durov',
+      avatar: 'https://i.imgur.com/7k12EPD.jpeg',
+      isVerified: true, // First user checkmark!
+      statusEmoji: 'https://i.imgur.com/wP01Z9p.gif',
+      customBanner: 'linear-gradient(135deg, #0077ff, #00d2ff)'
     };
+    DB.users.push(durovUser);
+    DB.currentUser = durovUser;
+    saveDB();
+  } else if (!DB.currentUser) {
+    DB.currentUser = DB.users[0];
+  }
+}
 
-    function toggleModal(id, show) {
-      document.getElementById(id).style.display = show ? 'flex' : 'none';
-      if(show && id === 'settingsModal') {
-        document.getElementById('setAvatar').value = currentUser.avatar || '';
-        document.getElementById('setEmoji').value = currentUser.emoji || '';
-        document.getElementById('setBg').value = currentUser.bg || '';
-        document.getElementById('setWallpaper').value = localStorage.getItem('customWallpaper') || '';
-        document.getElementById('setCustomCss').value = localStorage.getItem('customCSS') || '';
-      }
-    }
+function saveDB() {
+  localStorage.setItem('vk_users', JSON.stringify(DB.users));
+  localStorage.setItem('vk_messages', JSON.stringify(DB.messages));
+  localStorage.setItem('vk_current_user', JSON.stringify(DB.currentUser));
+}
 
-    async function saveProfile() {
-      currentUser.avatar = document.getElementById('setAvatar').value;
-      currentUser.emoji = document.getElementById('setEmoji').value;
-      currentUser.bg = document.getElementById('setBg').value;
-      
-      const wp = document.getElementById('setWallpaper').value;
-      if(wp) localStorage.setItem('customWallpaper', wp);
-      else localStorage.removeItem('customWallpaper');
-      
-      const css = document.getElementById('setCustomCss').value;
-      if(css) localStorage.setItem('customCSS', css);
-      else localStorage.removeItem('customCSS');
+/* --- SEARCH ENGINE (FUZZY / PARTIAL MATCH) --- */
+function handleSearch(query) {
+  const cleanQuery = query.toLowerCase().trim();
+  renderChatList(cleanQuery);
+}
 
-      applyLocalSettings();
-      await saveDB();
-      toggleModal('settingsModal', false);
-      renderApp();
-    }
+function renderChatList(filter = '') {
+  const container = document.getElementById('chat-list-container');
+  container.innerHTML = '';
 
-    function applyLocalSettings() {
-      const wp = localStorage.getItem('customWallpaper');
-      if (wp) document.documentElement.style.setProperty('--chat-wallpaper', `url(${wp})`);
-      const css = localStorage.getItem('customCSS');
-      if (css) document.getElementById('user-custom-css').innerHTML = css;
-    }
+  // 1. Always Render Favorites ("Избранное")
+  const favActive = DB.activeChatId === 'favorites' ? 'active' : '';
+  container.innerHTML += `
+    <div class="chat-item ${favActive}" onclick="selectChat('favorites')">
+      <div class="avatar-wrapper">
+        <div style="width:100%; height:100%; background:var(--vk-blue); border-radius:50%; display:flex; align-items:center; justify-content:center; fill:#fff;">
+          <svg width="22" height="22" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+        </div>
+      </div>
+      <div class="chat-info">
+        <div class="chat-name-row"><span class="chat-name">Избранное</span></div>
+        <div class="chat-last-msg">Сохраненные сообщения</div>
+      </div>
+    </div>
+  `;
 
-    // UI Rendering
-    function switchTab(tab) {
-      currentTab = tab;
-      document.querySelectorAll('.server-btn').forEach(b => b.classList.remove('active'));
-      event.currentTarget.classList.add('active');
-      document.getElementById('sidebarTitle').innerText = tab === 'direct' ? 'Личные сообщения' : 'Сервер';
-      renderChats();
-    }
+  // 2. Global Users Search
+  DB.users.forEach(user => {
+    if (user.id === DB.currentUser.id) return; // Skip self
+    if (filter && !user.username.toLowerCase().includes(filter)) return;
 
-    function renderApp() {
-      renderServers();
-      renderChats();
-    }
+    const isActive = DB.activeChatId === user.id ? 'active' : '';
+    const badge = user.isVerified ? DUROV_VERIFIED_SVG : '';
+    const statusIcon = user.statusEmoji ? `<img src="${user.statusEmoji}" class="custom-status-icon">` : '';
 
-    function renderServers() {
-      let html = `<div class="server-btn ${currentTab==='direct'?'active':''}" onclick="switchTab('direct')"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM9 11H7V9h2v2zm4 0h-2V9h2v2zm4 0h-2V9h2v2z"/></svg></div>`;
-      db.chats.filter(c => c.type === 'server').forEach(s => {
-        html += `<div class="server-btn ${currentTab===s.id?'active':''}" onclick="switchTab('${s.id}')" title="${s.name}"><img src="${s.avatar}"></div>`;
-      });
-      document.getElementById('serversBar').innerHTML = html;
-    }
-
-    function renderChats() {
-      const q = document.getElementById('searchInput').value.toLowerCase();
-      let html = "";
-      
-      // Filter Chats
-      let list = db.chats.filter(c => {
-        if(currentTab === 'direct') return c.type === 'direct';
-        return c.id === currentTab;
-      });
-      list = list.filter(c => c.name.toLowerCase().includes(q));
-
-      list.forEach(c => {
-        html += `
-          <div class="chat-item ${currentChatId===c.id?'active':''}" onclick="openChat('${c.id}')">
-            <div class="avatar-wrap"><img class="avatar" src="${c.avatar}"></div>
-            <div style="overflow:hidden;">
-              <div style="font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${c.name}</div>
-              <div style="font-size:12px; opacity:0.6; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${c.messages.length > 0 ? c.messages[c.messages.length-1].text : ''}</div>
-            </div>
+    container.innerHTML += `
+      <div class="chat-item ${isActive}" onclick="selectChat('${user.id}')">
+        <div class="avatar-wrapper">
+          <img src="${user.avatar || 'https://via.placeholder.com/44'}" alt="Avatar">
+          <div class="status-indicator"></div>
+        </div>
+        <div class="chat-info">
+          <div class="chat-name-row">
+            <span class="chat-name">${user.username}</span>
+            ${badge}
+            ${statusIcon}
           </div>
-        `;
-      });
+          <div class="chat-last-msg">Нажмите чтобы открыть чат</div>
+        </div>
+      </div>
+    `;
+  });
+}
 
-      // Global Search for Users (if search query exists and in DM mode)
-      if (q && currentTab === 'direct') {
-        let globalUsers = db.users.filter(u => u.name.toLowerCase().includes(q) && u.name !== currentUser.name);
-        if (globalUsers.length > 0) {
-          html += `<div style="margin: 10px; font-size: 11px; opacity: 0.5; text-transform: uppercase;">Глобальный поиск</div>`;
-          globalUsers.forEach(u => {
-            html += `
-              <div class="chat-item" onclick="startDM('${u.name}')">
-                <div class="avatar-wrap"><img class="avatar" src="${u.avatar}"></div>
-                <div style="font-weight:600;">${u.name}</div>
-              </div>
-            `;
-          });
-        }
-      }
-      
-      document.getElementById('chatList').innerHTML = html;
+/* --- CHAT SYSTEM --- */
+function selectChat(id) {
+  DB.activeChatId = id;
+  renderChatList();
+  renderActiveChat();
+}
+
+function openFavorites() {
+  selectChat('favorites');
+}
+
+function renderActiveChat() {
+  const headerContainer = document.getElementById('current-chat-header');
+  const messagesContainer = document.getElementById('chat-messages-container');
+  messagesContainer.innerHTML = '';
+
+  if (DB.activeChatId === 'favorites') {
+    headerContainer.innerHTML = `<span class="chat-name">Избранное</span>`;
+  } else {
+    const targetUser = DB.users.find(u => u.id === DB.activeChatId);
+    if (targetUser) {
+      const badge = targetUser.isVerified ? DUROV_VERIFIED_SVG : '';
+      headerContainer.innerHTML = `
+        <img src="${targetUser.avatar}" style="width:32px; height:32px; border-radius:50%; object-fit:cover;">
+        <span class="chat-name">${targetUser.username}</span>
+        ${badge}
+      `;
+    }
+  }
+
+  // Load Messages
+  const chatKey = getChatKey();
+  const msgs = DB.messages[chatKey] || [];
+
+  msgs.forEach(msg => {
+    const isOutgoing = msg.senderId === DB.currentUser.id;
+    const bubbleClass = isOutgoing ? 'outgoing' : 'incoming';
+    const stickerClass = msg.isSticker ? 'sticker' : '';
+
+    let contentHtml = msg.text;
+    if (msg.mediaUrl) {
+      contentHtml += `<img src="${msg.mediaUrl}" class="message-media">`;
     }
 
-    function getUserData(name) {
-      if(name === "Система") return { name: "Система", isVerified: true, avatar: "https://i.pravatar.cc/150?img=11", bg: "", emoji: "" };
-      return db.users.find(u => u.name === name) || { name, isVerified: false, avatar: "https://i.pravatar.cc/150", bg: "", emoji: "" };
-    }
+    messagesContainer.innerHTML += `
+      <div class="message-bubble ${bubbleClass} ${stickerClass}">
+        ${contentHtml}
+      </div>
+    `;
+  });
 
-    function generateNameHTML(user) {
-      let badge = user.isVerified ? `<svg class="verified-badge" viewBox="0 0 24 24"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>` : '';
-      let emoji = user.emoji ? `<img class="nick-emoji" src="${user.emoji}">` : '';
-      return `${user.name} ${badge} ${emoji}`;
-    }
+  messagesContainer.scrollTop = messagesContainer.scrollHeight;
+}
 
-    async function startDM(targetName) {
-      const dmName = [currentUser.name, targetName].sort().join("_");
-      let chat = db.chats.find(c => c.id === dmName);
-      if(!chat) {
-        const target = getUserData(targetName);
-        chat = { id: dmName, type: "direct", name: targetName, avatar: target.avatar, messages: [] };
-        db.chats.push(chat);
-        await saveDB();
-      }
-      document.getElementById('searchInput').value = "";
-      openChat(chat.id);
-    }
+function getChatKey() {
+  if (DB.activeChatId === 'favorites') return `fav_${DB.currentUser.id}`;
+  return [DB.currentUser.id, DB.activeChatId].sort().join('_');
+}
 
-    function openChat(id) {
-      currentChatId = id;
-      renderChats();
-      const chat = db.chats.find(c => c.id === id);
-      if (!chat) return;
+function sendMessage(customMedia = null, isSticker = false) {
+  const input = document.getElementById('message-input');
+  const isStickerChecked = document.getElementById('sticker-mode-toggle').checked || isSticker;
+  const text = input.value.trim();
 
-      document.getElementById('currentChatAvatar').src = chat.avatar;
-      document.getElementById('currentChatAvatar').style.display = 'block';
-      document.getElementById('currentChatName').innerHTML = chat.name;
-      document.getElementById('currentChatSub').innerText = chat.type === 'server' ? 'Сервер' : 'Личный чат';
+  if (!text && !customMedia) return;
 
-      if(chat.type === 'server') renderMembers(chat);
-      else document.getElementById('membersList').innerHTML = '';
+  const chatKey = getChatKey();
+  if (!DB.messages[chatKey]) DB.messages[chatKey] = [];
 
-      renderMessages();
-      document.getElementById('pickerPanel').style.display = 'none';
-      document.getElementById('pickerBtn').classList.remove('toggle-active');
-    }
+  DB.messages[chatKey].push({
+    senderId: DB.currentUser.id,
+    text: text,
+    mediaUrl: customMedia,
+    isSticker: isStickerChecked,
+    timestamp: Date.now()
+  });
 
-    function renderMembers(chat) {
-      let html = "";
-      db.users.forEach(u => {
-        const udata = getUserData(u.name);
-        html += `
-          <div class="member-item">
-            <img src="${udata.avatar}" class="avatar" style="width:32px;height:32px;">
-            <div>
-              <div style="background: ${udata.bg || 'transparent'}; -webkit-background-clip: text; -webkit-text-fill-color: ${udata.bg ? 'transparent' : 'inherit'};">${generateNameHTML(udata)}</div>
-            </div>
-          </div>
-        `;
-      });
-      document.getElementById('membersList').innerHTML = html;
-    }
+  saveDB();
+  input.value = '';
+  document.getElementById('sticker-mode-toggle').checked = false;
+  renderActiveChat();
+}
 
-    // Parsing Custom Emojis in Text
-    function parseTextEmojis(text) {
-      if (!text) return "";
-      let parsed = text;
-      // Protect HTML first
-      parsed = parsed.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-      
-      db.emojiPacks.forEach(pack => {
-        pack.emojis.forEach(e => {
-          // Replace :code: with image tag
-          const regex = new RegExp(e.code.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'g');
-          parsed = parsed.replace(regex, `<img src="${e.url}" class="inline-emoji" alt="${e.code}" title="${e.code}">`);
-        });
-      });
-      return parsed;
-    }
+/* --- MEDIA & STICKERS --- */
+function handleFileUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
 
-    function renderMessages() {
-      const chat = db.chats.find(c => c.id === currentChatId);
-      const container = document.getElementById('msgs');
-      if (!chat) { container.innerHTML = ''; return; }
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const isSticker = document.getElementById('sticker-mode-toggle').checked;
+    sendMessage(e.target.result, isSticker);
+  };
+  reader.readAsDataURL(file);
+}
 
-      let html = "";
-      chat.messages.forEach(m => {
-        const isMe = m.sender === currentUser.name;
-        const senderData = getUserData(m.sender);
-        
-        let mediaHtml = "";
-        if (m.media) {
-          if (m.media.match(/\.(mp4|webm|ogg)$/i)) mediaHtml = `<video class="msg-media" src="${m.media}" controls autoplay loop muted></video>`;
-          else mediaHtml = `<img class="msg-media" src="${m.media}">`;
-        }
+/* --- SETTINGS & LOCAL CSS EDITING --- */
+function toggleModal(id) {
+  const modal = document.getElementById(id);
+  modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
 
-        const msgClass = m.isSticker ? 'msg msg-sticker' : 'msg';
-        const parsedText = m.isSticker ? '' : parseTextEmojis(m.text);
+  if (id === 'settings-modal' && DB.currentUser) {
+    document.getElementById('setting-username').value = DB.currentUser.username || '';
+    document.getElementById('setting-status-emoji').value = DB.currentUser.statusEmoji || '';
+    document.getElementById('setting-avatar-url').value = DB.currentUser.avatar || '';
+    document.getElementById('setting-banner-color').value = DB.currentUser.customBanner || '';
+    document.getElementById('preview-avatar').src = DB.currentUser.avatar || '';
+    document.getElementById('preview-banner').style.background = DB.currentUser.customBanner || 'var(--vk-blue)';
+    document.getElementById('setting-custom-css').value = localStorage.getItem('user_custom_css') || '';
+  }
+}
 
-        html += `
-          <div class="${msgClass} ${isMe ? 'me' : ''}">
-            <div class="msg-header">
-              ${!isMe ? `<img src="${senderData.avatar}" style="width:16px;height:16px;border-radius:50%;">` : ''}
-              <span style="background: ${senderData.bg || 'transparent'}; -webkit-background-clip: text; -webkit-text-fill-color: ${senderData.bg ? 'transparent' : 'inherit'};">${generateNameHTML(senderData)}</span>
-              <span style="font-size:10px; opacity:0.5; font-weight:normal; margin-left:auto;">${m.time}</span>
-            </div>
-            ${parsedText}
-            ${mediaHtml}
-          </div>
-        `;
-      });
-      
-      container.innerHTML = html;
-      container.scrollTop = container.scrollHeight;
-    }
+function saveSettings() {
+  DB.currentUser.username = document.getElementById('setting-username').value;
+  DB.currentUser.statusEmoji = document.getElementById('setting-status-emoji').value;
+  DB.currentUser.avatar = document.getElementById('setting-avatar-url').value;
+  DB.currentUser.customBanner = document.getElementById('setting-banner-color').value;
 
-    // Custom Emoji / Sticker Picker Logic
-    function togglePicker() {
-      const p = document.getElementById('pickerPanel');
-      const btn = document.getElementById('pickerBtn');
-      if (p.style.display === 'flex') {
-        p.style.display = 'none';
-        btn.classList.remove('toggle-active');
-      } else {
-        p.style.display = 'flex';
-        btn.classList.add('toggle-active');
-        renderPickerContent();
-      }
-    }
+  const cssCode = document.getElementById('setting-custom-css').value;
+  localStorage.setItem('user_custom_css', cssCode);
+  loadCustomCSS();
 
-    function switchPicker(mode) {
-      pickerMode = mode;
-      document.querySelectorAll('.picker-tab').forEach((el, i) => {
-        el.classList.toggle('active', (i === 0 && mode === 'emojis') || (i === 1 && mode === 'stickers'));
-      });
-      document.getElementById('pickerContent').className = `picker-content grid-${mode}`;
-      renderPickerContent();
-    }
+  saveDB();
+  renderChatList();
+  renderActiveChat();
+  toggleModal('settings-modal');
+}
 
-    function renderPickerContent() {
-      const c = document.getElementById('pickerContent');
-      let html = '';
-      
-      if (pickerMode === 'emojis') {
-        db.emojiPacks.forEach(pack => {
-          pack.emojis.forEach(e => {
-            html += `<img src="${e.url}" class="picker-item" title="${e.code}" onclick="insertEmojiCode('${e.code}')">`;
-          });
-        });
-      } else {
-        db.stickerPacks.forEach(pack => {
-          pack.stickers.forEach(url => {
-            html += `<img src="${url}" class="picker-item" onclick="sendSticker('${url}')">`;
-          });
-        });
-      }
-      c.innerHTML = html;
-    }
+function loadCustomCSS() {
+  const css = localStorage.getItem('user_custom_css');
+  if (css) {
+    document.getElementById('user-custom-css').innerText = css;
+  }
+}
 
-    function insertEmojiCode(code) {
-      const input = document.getElementById('msgInput');
-      input.value += code;
-      input.focus();
-    }
+function uploadLocalWallpaper(event) {
+  const file = event.target.files[0];
+  if (!file) return;
 
-    function sendSticker(url) {
-      executeSend("", url, true);
-      togglePicker(); // Close picker after sending sticker
-    }
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    localStorage.setItem('chat_wallpaper', e.target.result);
+    loadWallpaper();
+  };
+  reader.readAsDataURL(file);
+}
 
-    // Message Sending Logic
-    function sendMsg() {
-      const input = document.getElementById('msgInput');
-      let text = input.value.trim();
-      if (!text || !currentChatId) return;
+function loadWallpaper() {
+  const wp = localStorage.getItem('chat_wallpaper');
+  if (wp) {
+    document.getElementById('chat-messages-container').style.backgroundImage = `url('${wp}')`;
+  }
+}
 
-      let mediaUrl = null;
-      // Detect if text is just a URL for media
-      const urlMatch = text.match(/^(https?:\/\/[^\s]+)$/);
-      if (urlMatch && urlMatch[0].match(/\.(jpeg|jpg|gif|png|mp4|webm)$/i)) {
-        mediaUrl = urlMatch[0];
-        text = "";
-      }
+/* --- EMOJI & STICKER PACKS (JSON SCHEMA) --- */
+function loadEmojiPacks() {
+  // Demo external sticker / emoji JSON configuration
+  fetch('emojis.json')
+    .then(res => res.json())
+    .then(data => {
+      DB.emojiPacks = data.packs || [];
+      renderEmojiPacks();
+    })
+    .catch(() => {
+      // Fallback local open pack
+      DB.emojiPacks = [{
+        name: "VK Official Pack",
+        items: [
+          { code: ":vk:", url: "https://vk.com/favicon.ico" }
+        ]
+      }];
+      renderEmojiPacks();
+    });
+}
 
-      executeSend(text, mediaUrl, false);
-      input.value = "";
-    }
+function renderEmojiPacks() {
+  const container = document.getElementById('emoji-packs-container');
+  container.innerHTML = '';
 
-    async function executeSend(text, mediaUrl, isSticker) {
-      if(!currentChatId) return;
-      const chat = db.chats.find(c => c.id === currentChatId);
-      
-      const d = new Date();
-      const time = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-      
-      chat.messages.push({
-        sender: currentUser.name,
-        text: text,
-        media: mediaUrl,
-        isSticker: isSticker,
-        time: time
-      });
-      
-      renderMessages();
-      renderChats(); // Update last message in sidebar
-      await saveDB();
-    }
+  DB.emojiPacks.forEach(pack => {
+    let itemsHtml = pack.items.map(item => `
+      <img src="${item.url}" title="${item.code}" style="width:36px; height:36px; cursor:pointer;" onclick="insertEmoji('${item.url}')">
+    `).join('');
 
-    async function refreshMsgs() {
-      if(!currentChatId) return;
-      await loadDB();
-      renderMessages();
-      renderChats();
-    }
-  </script>
+    container.innerHTML += `
+      <div style="border:1px solid var(--vk-border); border-radius:8px; padding:10px;">
+        <div style="font-weight:600; margin-bottom:8px;">${pack.name}</div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">${itemsHtml}</div>
+      </div>
+    `;
+  });
+}
+
+function insertEmoji(url) {
+  const input = document.getElementById('message-input');
+  sendMessage(`<img src="${url}" class="inline-emoji">`);
+  toggleModal('emoji-modal');
+}
+</script>
 </body>
 </html>
