@@ -1,0 +1,48 @@
+{
+  "users": [],
+  "chats": [
+    {
+      "id": "server_main",
+      "type": "server",
+      "name": "Главный Сервер",
+      "avatar": "https://i.pravatar.cc/150?img=11",
+      "messages": [
+        {
+          "sender": "Система",
+          "text": "Добро пожаловать! Зарегистрируйся первым, чтобы получить синюю галочку. Попробуй наши эмодзи :fire: прямо в тексте!",
+          "time": "12:00"
+        }
+      ]
+    }
+  ],
+  "emojiPacks": [
+    {
+      "id": "epack_1",
+      "title": "Premium Emojis",
+      "emojis": [
+        {
+          "code": ":fire:",
+          "url": "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHp1eXEzM3A4NWt3bHRyYzN6M2tzNWZ4Ynk1ZW0zNDRua2RkeXlzYSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/l0HlTy9x8GH9vP04/giphy.gif"
+        },
+        {
+          "code": ":pepe:",
+          "url": "https://i.imgur.com/2x81333.png"
+        },
+        {
+          "code": ":cat:",
+          "url": "https://i.pravatar.cc/100?img=4"
+        }
+      ]
+    }
+  ],
+  "stickerPacks": [
+    {
+      "id": "spack_1",
+      "title": "Стикеры (Без фона)",
+      "stickers": [
+        "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHp1eXEzM3A4NWt3bHRyYzN6M2tzNWZ4Ynk1ZW0zNDRua2RkeXlzYSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/l0HlTy9x8GH9vP04/giphy.gif",
+        "https://i.imgur.com/2x81333.png"
+      ]
+    }
+  ]
+}
