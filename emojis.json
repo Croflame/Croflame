@@ -1,0 +1,11 @@
+{
+  "packs": [
+    {
+      "name": "Animated Reactions",
+      "items": [
+        { "code": ":fire:", "url": "https://i.imgur.com/wP01Z9p.gif" },
+        { "code": ":like:", "url": "https://vk.com/favicon.ico" }
+      ]
+    }
+  ]
+}
